@@ -88,6 +88,14 @@
   --app-font-display: 'Anybody', 'JetBrains Mono', 'SF Mono', system-ui, sans-serif;
   --app-mono: var(--app-font-data);
 
+  /* ---- Motion. THE RULE: springs for chrome you TOUCH (tabs, chips, cards,
+   * menus appearing); linear and exact for anything the engine DRIVES
+   * (playheads, meters, modulation, countdowns). A spring on driven motion lies
+   * about the timing; a spring on a button tells you it heard you. These are
+   * CSS linear() approximations of damped springs (one overshoot, settle). */
+  --motion-spring: linear(0, 0.071, 0.246, 0.472, 0.705, 0.911, 1.07, 1.174, 1.225, 1.232, 1.205, 1.159, 1.104, 1.051, 1.007, 0.974, 0.954, 0.946, 0.947, 0.955, 0.967, 0.98, 0.992, 1.001, 1.008, 1.012, 1.013, 1.012, 1.01, 1.007, 1.004, 1.001, 0.999, 0.998, 0.997, 0.997, 0.997, 0.998, 0.999, 0.999, 1);
+  --motion-spring-soft: linear(0, 0.06, 0.202, 0.382, 0.565, 0.731, 0.866, 0.968, 1.036, 1.076, 1.093, 1.093, 1.083, 1.068, 1.05, 1.033, 1.019, 1.008, 1, 0.994, 0.992, 0.991, 0.992, 0.993, 0.994, 0.996, 0.998, 0.999, 1, 1, 1.001);
+
   /* Tracking widens as a label gets smaller and more structural — the inverse
    * of the usual instinct, and what keeps a 9px uppercase tag readable. */
   --app-tr-1: 0.04em;            /* dense group heading */
