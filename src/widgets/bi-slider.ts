@@ -222,6 +222,13 @@ export class BiSlider extends ScalarControl {
         border-radius: var(--app-r-3);
         padding: 0 2px;
         outline: none;
+        /* Takes no more height than the readout it replaces, so the row never
+         * shifts when editing starts: the label sets the line, and the box
+         * hangs 4px into the gaps above and below. */
+        line-height: 1;
+        box-sizing: border-box;
+        height: calc(var(--fs-xs) + 4px);
+        margin-block: -4px;
       }
       :host([density='compact']) .track { height: calc(9px * var(--bi-scale)); }
       :host([density='compact']) .head { display: none; }
