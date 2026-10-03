@@ -35,6 +35,7 @@ import { PointerDragOp } from '../core/drag';
 import type { ContinuousEditHandle, FieldBinding } from '../core/binding';
 import type { Choice } from '../core/schema';
 import type { Density } from './scalar-base';
+import { installLabelAnchors, type FieldAnchors } from '../core/anchors';
 
 /** A marker on a cell: a bound parameter's value, drawn as a handle. */
 export interface GridMarker { path: string; label: string; color?: string; }
@@ -319,6 +320,10 @@ export class BiGrid extends LitElement {
     `;
   }
 }
+
+/** The anchor contract (core/anchors.ts): the label selects, the pip sits beside it. */
+installLabelAnchors(BiGrid);
+export interface BiGrid extends FieldAnchors {}
 
 declare global {
   interface HTMLElementTagNameMap { 'bi-grid': BiGrid; }

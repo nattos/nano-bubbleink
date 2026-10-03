@@ -45,6 +45,7 @@ import { Spring } from '../core/spring';
 import { FrameLoop } from '../core/canvas';
 import type { FieldBinding } from '../core/binding';
 import type { Density } from './scalar-base';
+import { installLabelAnchors, type FieldAnchors } from '../core/anchors';
 
 /** Unscaled pip geometry. Travel is derived so the pip always ends flush. */
 const TRACK_W = 26;
@@ -276,6 +277,10 @@ export class BiToggle extends LitElement {
     `;
   }
 }
+
+/** The anchor contract (core/anchors.ts): the label selects, the pip sits beside it. */
+installLabelAnchors(BiToggle);
+export interface BiToggle extends FieldAnchors {}
 
 declare global {
   interface HTMLElementTagNameMap {

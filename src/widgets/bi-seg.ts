@@ -68,6 +68,7 @@ import { FrameLoop } from '../core/canvas';
 import type { FieldBinding } from '../core/binding';
 import type { Choice } from '../core/schema';
 import type { Density } from './scalar-base';
+import { installLabelAnchors, type FieldAnchors } from '../core/anchors';
 
 function needsWrap(options: Choice[]): boolean {
   if (options.length > 5) return true;
@@ -401,6 +402,10 @@ export class BiSeg extends LitElement {
     `;
   }
 }
+
+/** The anchor contract (core/anchors.ts): the label selects, the pip sits beside it. */
+installLabelAnchors(BiSeg);
+export interface BiSeg extends FieldAnchors {}
 
 declare global {
   interface HTMLElementTagNameMap {

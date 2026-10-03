@@ -14,6 +14,7 @@
  */
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
+import { pipBeside, type FieldAnchors, type AnchorPoint } from '../core/anchors';
 import { base, cssVar } from '../theme/base';
 import { withAlpha } from '../theme/ramp';
 import { PointerDragOp } from '../core/drag';
@@ -24,7 +25,7 @@ import type { Density } from './scalar-base';
 export interface XyMarker { x: number; y: number; color?: string; label?: string }
 
 @customElement('bi-xy')
-export class BiXy extends LitElement {
+export class BiXy extends LitElement implements FieldAnchors {
   static styles = [
     base,
     css`
@@ -164,6 +165,17 @@ export class BiXy extends LitElement {
       complete: () => { this.handle = null; this.drag = null; },
     });
   };
+
+  // ---- The anchor contract (core/anchors.ts). Two fields, one label: the
+  // label selects X (the pad's first field); both pips sit beside it, Y's a
+  // line lower so the two stay separately grabbable. ----
+  anchorPaths(): string[] { return [this.pathX, this.pathY].filter(Boolean); }
+  selectionRegion(): Element | null { return this.renderRoot.querySelector('.label'); }
+  inputPipAnchor(path?: string): AnchorPoint | null {
+    const p = pipBeside(this.selectionRegion(), this);
+    return path === this.pathY ? { x: p.x, y: p.y + 10 } : p;
+  }
+  fullRect(): DOMRect { return this.getBoundingClientRect(); }
 
   render() {
     const sx = this.binding?.spec(this.pathX), sy = this.binding?.spec(this.pathY);

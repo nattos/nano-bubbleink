@@ -53,6 +53,7 @@ import { modRange } from '../core/modrange';
 import { clamp01, fromPos, toPos, type ParamSpec } from '../core/schema';
 import type { FieldBinding, ModState, MultiContinuousEditHandle } from '../core/binding';
 import type { Density } from './scalar-base';
+import { installLabelAnchors, type FieldAnchors } from '../core/anchors';
 
 /** Vertical travel, in px, for the whole width range. */
 const WIDTH_PX = 120;
@@ -329,6 +330,10 @@ function sameMod(a: ModState | null, b: ModState | null): boolean {
   if (!a || !b) return false;
   return a.value === b.value && a.min === b.min && a.max === b.max && a.neutral === b.neutral;
 }
+
+/** The anchor contract (core/anchors.ts): the label selects, the pip sits beside it. */
+installLabelAnchors(BiModbar);
+export interface BiModbar extends FieldAnchors {}
 
 declare global {
   interface HTMLElementTagNameMap { 'bi-modbar': BiModbar; }

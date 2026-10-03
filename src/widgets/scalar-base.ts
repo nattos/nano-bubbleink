@@ -25,6 +25,7 @@ import { FrameLoop, ChangePoller } from '../core/canvas';
 import { fromPos, toPos, type ParamSpec } from '../core/schema';
 import { formatNumber, parseValue, readingChars, unitOf } from '../core/format';
 import type { ContinuousEditHandle, FieldBinding, ModState } from '../core/binding';
+import { installLabelAnchors, type FieldAnchors } from '../core/anchors';
 
 export type Density = 'compact' | 'normal' | 'expanded';
 
@@ -551,3 +552,7 @@ export abstract class ScalarControl extends LitElement {
     this.focus();
   }
 }
+
+/** The anchor contract (core/anchors.ts): the label selects, the pip sits beside it. */
+installLabelAnchors(ScalarControl);
+export interface ScalarControl extends FieldAnchors {}

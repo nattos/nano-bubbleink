@@ -60,6 +60,7 @@ import { Spring } from '../core/spring';
 import { FrameLoop } from '../core/canvas';
 import type { FieldBinding } from '../core/binding';
 import type { Density } from './scalar-base';
+import { installLabelAnchors, type FieldAnchors } from '../core/anchors';
 
 /**
  * Minimum time the parameter stays at 1, in ms.
@@ -327,6 +328,10 @@ export class BiTrigger extends LitElement {
     `;
   }
 }
+
+/** The anchor contract (core/anchors.ts): the label selects, the pip sits beside it. */
+installLabelAnchors(BiTrigger);
+export interface BiTrigger extends FieldAnchors {}
 
 declare global {
   interface HTMLElementTagNameMap {

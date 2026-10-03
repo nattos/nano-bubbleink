@@ -8,6 +8,7 @@
  * the constellation needs exactly that until it is talking to a real host.
  */
 export * from './binding';
+export * from './anchors';
 export * from './schema';
 export * from './param-store';
 export * from './store';

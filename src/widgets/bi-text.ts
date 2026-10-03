@@ -50,6 +50,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { base } from '../theme/base';
 import type { TextBinding } from '../core/binding';
 import type { Density } from './scalar-base';
+import { installLabelAnchors, type FieldAnchors } from '../core/anchors';
 
 @customElement('bi-text')
 export class BiText extends LitElement {
@@ -241,6 +242,10 @@ export class BiText extends LitElement {
     `;
   }
 }
+
+/** The anchor contract (core/anchors.ts): the label selects, the pip sits beside it. */
+installLabelAnchors(BiText);
+export interface BiText extends FieldAnchors {}
 
 declare global {
   interface HTMLElementTagNameMap {
