@@ -1,0 +1,33 @@
+/**
+ * bubbleink — the bundled faces.
+ *
+ * Bundled, never fetched: the apps that use this run offline (a desktop video
+ * tool on a show network), so a Google Fonts link would be a silent fallback
+ * to the system face in exactly the place it matters. A bundler (vite) emits
+ * the files as assets from these relative URLs.
+ *
+ * Faces are reached ONLY through the type tokens in tokens.css
+ * (--app-font-data, --app-font-display). No component names a face, so
+ * changing typefaces -- or a skin choosing its own -- is a token edit.
+ *
+ *   JetBrains Mono  data: every value and label (the house face).
+ *   Anybody         display: variable width (50-150%) and weight (100-900);
+ *                   condensed for numerals, wide for names, springy on hover.
+ */
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('../../fonts/jetbrains-mono/JetBrainsMono-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: italic; font-weight: 400; font-display: swap; src: url('../../fonts/jetbrains-mono/JetBrainsMono-Italic.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url('../../fonts/jetbrains-mono/JetBrainsMono-Medium.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url('../../fonts/jetbrains-mono/JetBrainsMono-SemiBold.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url('../../fonts/jetbrains-mono/JetBrainsMono-Bold.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: italic; font-weight: 700; font-display: swap; src: url('../../fonts/jetbrains-mono/JetBrainsMono-BoldItalic.woff2') format('woff2'); }
+
+@font-face {
+  font-family: 'Anybody'; font-style: normal; font-weight: 100 900; font-stretch: 50% 150%; font-display: swap;
+  src: url('../../fonts/anybody/Anybody-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Anybody'; font-style: normal; font-weight: 100 900; font-stretch: 50% 150%; font-display: swap;
+  src: url('../../fonts/anybody/Anybody-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}

@@ -1,0 +1,566 @@
+/**
+ * Augmented Audio Labs — design tokens.
+ *
+ * Ported from nano-modules/web/src/style.css, whose palette had independently
+ * converged with annotator/src/nanonome_player.ts — two codebases arriving at
+ * the same ground, text ramp and tint ladder is the strongest evidence we have
+ * that this is the house look, so it is adopted rather than re-derived.
+ *
+ * ONE FIX ON THE WAY IN. In nano-modules these five were load-bearing but lived
+ * only as inline var() fallbacks, never defined in :root — so their real value
+ * was whatever the last author typed at each call site, and --app-border-color's
+ * fallback (#3a3346, a purple-grey) is off-palette outright:
+ *   --app-mod-color --app-border-color --app-err-color --app-text-color3 --app-mono
+ * Every token used anywhere is defined here. Nothing gets to exist only as a
+ * fallback.
+ *
+ * The scales are LADDERS, and the rule the original states for the tint ramp
+ * generalises to all of them: snap to a rung, never introduce an in-between.
+ */
+
+:root {
+  /* ---- Surfaces ----
+   *
+   * DEEPER THAN THE PORTED PALETTE, AND DELIBERATELY SO. The originals were
+   * mid-dark greys, which is correct for a UI that must stay legible in a lit
+   * room and wrong for one whose whole job is to make a small amount of
+   * saturated light read as luminous. Emission is relative: a glow is only as
+   * bright as the black it sits on, and #121418 was quietly costing every
+   * accent in the system about a stop of apparent brightness.
+   *
+   * The rule that follows from it: BLACK IS THE DEFAULT STATE OF THIS UI. Most
+   * of the surface should be near-black most of the time, and anything lit is
+   * lit because it is telling you something. */
+  --app-bg-color1: #07080b;      /* app background */
+  --app-bg-color2: #0e1116;      /* panels, cards, dropdowns, canvases */
+  --app-bg-sunken: #030406;      /* wells: canvas grounds, inset tracks */
+
+  /* ---- Text ---- */
+  --app-text-color1: #eaeaea;    /* primary */
+  --app-text-color2: #b0b0b0;    /* secondary / labels */
+  --app-text-color3: #7a7f88;    /* tertiary / disabled / units */
+
+  /* ---- Accents (semantic, not decorative) ----
+   * Brightened off the ported palette. Those values were tuned for a VJ rig
+   * read at a glance under stage lights, where a saturated UI competes with the
+   * output; here the UI IS the output, and muted accents on a near-black ground
+   * read as switched off. */
+  --app-hi-color1: #ff5b2e;      /* primary: output taps, alerts, learn/active */
+  --app-hi-color2: #3ba7ff;      /* secondary: selection, focus, input taps */
+  --app-hi-color3: #ffa322;      /* tertiary: output indicators */
+  --app-hi-color4: #ffe066;      /* data / JSON / code */
+
+  /* ---- Status ---- */
+  --app-ok: #45d67f;
+  --app-warn: #ffbb3d;
+  --app-error: #ff6b6b;
+
+  /* CAUTION is not a status and not an accent: it marks a claim that is not a
+   * measurement — an extrapolated region, a held frame, a value off its
+   * calibrated default. It must never be used to mean "on", or the one signal
+   * that says "do not trust this number" stops being legible. */
+  --app-caution: #e8a83c;
+
+  /* MODULATION. Its own role, distinct from every accent above, because a
+   * control's modulated value is a different KIND of thing from its set value. */
+  --app-mod-color: #ffc233;
+
+  /* ---- Data-flow roles ---- */
+  --app-io-input: #4dc9f6;
+  --app-io-output: #ff8c00;
+
+  /* ---- Borders ---- */
+  --app-border-color: rgba(255, 255, 255, 0.12);  /* == tint-4; the standard border */
+
+  /* ---- Type scale. 11px (md) is the base. ---- */
+  --app-fs-xs: 9px;              /* values, badges, tertiary */
+  --app-fs-sm: 10px;             /* labels, captions */
+  --app-fs-md: 11px;             /* body / default */
+  --app-fs-lg: 12px;             /* card names, section labels */
+  --app-fs-xl: 14px;             /* glyph / icon buttons */
+  --app-fs-2xl: 16px;            /* large headings / empty-state prompts */
+
+  /* ---- Typefaces. The ONLY place a face is named (fonts.css bundles them).
+   * data: every value and label. display: names, headings, big readouts --
+   * pair it with tabular digit cells (.reading) wherever numbers run.
+   * --app-mono is the historical name for the data face; keep it an alias. */
+  --app-font-data: 'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace;
+  --app-font-display: 'Anybody', 'JetBrains Mono', 'SF Mono', system-ui, sans-serif;
+  --app-mono: var(--app-font-data);
+
+  /* Tracking widens as a label gets smaller and more structural — the inverse
+   * of the usual instinct, and what keeps a 9px uppercase tag readable. */
+  --app-tr-1: 0.04em;            /* dense group heading */
+  --app-tr-2: 0.06em;            /* field label */
+  --app-tr-3: 0.08em;            /* section header */
+  --app-tr-4: 0.10em;            /* axis tag */
+  --app-tr-5: 0.12em;            /* page title */
+
+  /* ---- Spacing ---- */
+  --app-sp-1: 2px;
+  --app-sp-2: 4px;
+  --app-sp-3: 6px;
+  --app-sp-4: 8px;
+  --app-sp-5: 12px;
+  --app-sp-6: 16px;
+
+  /* ---- Radii. TWO ladders, and the split is the point. ----
+   *
+   * The ported palette said "near-square is the house look" and stopped at 4px.
+   * That reads clinical, which is right for a VJ rig being driven under stage
+   * lights and wrong for an instrument you are meant to want to touch. So the
+   * ladder forks by what the thing IS:
+   *
+   *   CRISP (1-4px) for anything carrying data or taking a precise hit — a
+   *   segment button, a value chip, a track, a cell. Softening these costs
+   *   legible edges and buys nothing; a 12px-radius segmented control is a
+   *   pill, and a pill is a toy.
+   *
+   *   SOFT (8-22px) for containers — cards, groups, the lab overlay. These are
+   *   furniture. Their job is to gather and to invite, and a generous radius is
+   *   most of how a surface says "this is one thing".
+   *
+   * Firmness therefore tracks the hierarchy: soft at the top where you browse,
+   * crisp at the bottom where you measure. */
+  --app-r-1: 1px;                /* near-universal */
+  --app-r-2: 2px;                /* chips, segmented controls */
+  --app-r-3: 4px;                /* tracks, wells, small buttons */
+  --app-r-4: 8px;                /* inner containers, slots */
+  --app-r-5: 14px;               /* cards, groups */
+  --app-r-6: 22px;               /* the lab overlay, hero lobes */
+
+  /* ---- Neutral overlay tints ----
+   * The one ladder for dividers, borders and faint fills. Because they are
+   * translucent white over the base, swapping --app-bg-color1 re-derives the
+   * whole chrome. Snap to a rung; don't introduce in-between opacities. */
+  --app-tint-1: rgba(255, 255, 255, 0.03);  /* faint divider */
+  --app-tint-2: rgba(255, 255, 255, 0.06);  /* subtle fill / divider */
+  --app-tint-3: rgba(255, 255, 255, 0.08);  /* standard divider */
+  --app-tint-4: rgba(255, 255, 255, 0.12);  /* standard border */
+  --app-tint-5: rgba(255, 255, 255, 0.15);  /* hover / emphasis */
+
+  /* ---- Category accents ----
+   * Applied only as a 6px dot or a 1px chip border, kept low-key so a dense
+   * panel doesn't turn to confetti. */
+  --app-cat-source: #2ee6a8;     /* mint — generators */
+  --app-cat-color: #ffcc33;      /* gold — colour/tone */
+  --app-cat-filter: #3ba7ff;     /* blue — filtering */
+  --app-cat-warp: #b98bff;       /* violet — distortion */
+  --app-cat-composite: #ff6fae;  /* pink — blending */
+  --app-cat-motion: #ff9440;     /* orange — movement */
+  --app-cat-mod: #22d3ee;        /* cyan — modulation */
+  --app-cat-control: #9fb0c6;    /* slate — control/utility */
+  --app-cat-debug: #ff7a7a;      /* red — debug/test */
+
+  /* ---- Global scale ----
+   * The whole UI is sized in terms of this so a host can zoom it as a unit.
+   * Widgets declare intrinsic sizes against it but still stretch. */
+  --bi-scale: 1;
+
+  /* Per-instance accent. The ONLY custom property widgets are expected to have
+   * set on them from outside; everything else is read from :root. */
+  --accent: #22d3ee;
+
+  /* ==== JUICE AND GLASS =====================================================
+   *
+   * The material system, and it replaces the "no gradients, no shadows" rule
+   * rather than carving an exception out of it. That rule came from a VJ rig
+   * and produced a surface that reads as instrumentation: correct, legible,
+   * and inert. There are exactly two materials here, and every surface is one
+   * of them.
+   *
+   * JUICE is the data. Saturated, luminous, emissive — value fills, modulation
+   * bands, meters, spectra. It is the ONLY thing in the UI allowed to be
+   * bright, which is what makes a panel scan: the colour is the signal.
+   *
+   * GLASS is the chrome. Everything a hand touches is a glass element sitting
+   * over the juice — knob caps, buttons, segmented bars, cards. Glass is very
+   * nearly colourless, lit from above, and it TINTS toward whatever juice is
+   * behind it. It never carries a reading of its own.
+   *
+   * The discipline the old rule was protecting survives intact, restated: a
+   * gradient is a property of a MATERIAL, never of a VALUE. Glass may be lit;
+   * a spectrum may not. The moment a gradient appears on a data surface a
+   * reader will measure it, and they will be right to.
+   * ========================================================================= */
+
+  /* ---- Juice ----
+   * DERIVED PER WIDGET, IN theme/base.ts, NOT HERE.
+   *
+   * The obvious thing is `--juice: var(--accent)` at :root. It does not work,
+   * and it fails silently. A custom property's value is substituted at
+   * computed-value time on the element the declaration applies to -- so :root
+   * resolves --juice against :root's --accent once, and every descendant
+   * inherits that RESOLVED colour. Setting --accent further down recolours
+   * anything reading --accent directly and leaves every juice token behind, so
+   * a re-accented control ends up half cyan.
+   *
+   * Deriving them in base's :host means each widget recomputes the ramp from
+   * the --accent it actually inherited, which is the whole point of having a
+   * per-instance accent. The same reasoning is why --fs-* and --sp-* live
+   * there rather than here.
+   */
+
+  /* ---- Glass (material fallbacks) ----
+   * The values in this block are the deleted crystal skin's; every skin
+   * overrides them, so they only matter to a page that defines no skin AND
+   * opts out of the default (none does). Kept as the structural list of
+   * material tokens a skin must define.
+   *
+   * THE BODY IS NEAR-BLACK, NOT GREY, and that is the whole fix for the muddy
+   * first attempt. A grey body with translucent washes over it is alpha
+   * compositing, which is PAINT: every layer pulls the result toward the
+   * average of what is underneath, so a saturated juice tint over #1b1f27
+   * lands somewhere around a dull slate-teal no matter how bright the tint is.
+   *
+   * Light does not work like paint, and neither should this. Every luminous
+   * layer on the knob blends with `screen`, which over a near-black body is
+   * effectively additive: saturation is preserved, two overlapping glows get
+   * brighter instead of muddier, and the dark body reads as clear material
+   * rather than as grey plastic. The colour you specify is the colour you see.
+   *
+   * `body` is therefore only just above black -- it is the crystal's shadow,
+   * not its surface. Everything visible about the cap is a highlight.
+   */
+  --glass-body: #06080d;
+  --glass-sky: rgba(200, 230, 255, 0.17);   /* the sky in the dome's top face */
+  --glass-edge: rgba(255, 255, 255, 0.98);  /* the lit facet on the near rim */
+  /* Dispersion. A real edge splits what passes through it, and a hint of warmth
+   * on the shaded rim opposite the cool lit one is most of what makes a
+   * material read as crystal rather than as tinted plastic. Kept to a whisper:
+   * this is a lens edge, not a rainbow. */
+  --glass-disperse: rgba(255, 148, 64, 0.26);
+  --glass-spec: rgba(255, 255, 255, 0.55);
+
+  /* See theme/base.ts: the two directions a juice can be pushed. Crystal is a
+   * light medium, so lifting adds white and sinking approaches black. */
+  --juice-lift: #ffffff;
+  --juice-sink: #05070c;
+  /* What a value READOUT is made of. Under crystal it is emitted light, so it
+   * takes the hot juice; under ink it is line work and prints in the key
+   * colour. Delivered as a property because a shadow root cannot select on the
+   * skin attribute. */
+  --readout-color: var(--juice-hot);
+
+  /* ---- The material contract ----
+   *
+   * Every flat control -- slider tube, seg trough, toggle track -- is a WELL
+   * with a CHIP of juice in it. A skin reimplements these and nothing else,
+   * which is why a widget never names a colour.
+   *
+   * NOTE WHAT IS *NOT* HERE. The chip's background and shadow are assembled in
+   * theme/base.ts, not in this file, because they depend on --juice -- and a
+   * custom property is substituted where it is DECLARED. A `--chip-bg` written
+   * here referencing var(--juice) resolves against a :root that has no --juice,
+   * becomes guaranteed-invalid, and inherits as unset: the chip paints NOTHING
+   * and nothing errors. That is exactly what happened, and it is the third time
+   * this rule has bitten in this codebase (see also the juice ramp in base.ts
+   * and the readout colour above).
+   *
+   * The rule, stated once: A SKIN MAY ONLY DECLARE VALUES THAT DO NOT DEPEND ON
+   * --accent. Anything juice-derived is composed in base.ts from the scalars
+   * below. `--chip-sink: 0%` collapses the chip's gradient to a flat fill
+   * without this file ever having to name a colour to flatten it to.
+   */
+  --well-bg: #04060a;
+  --well-lip: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  /* The well's own edge, and what it becomes under the pointer.
+   *
+   * THE HOVER MARK IS ONE IDEA ACROSS THE FAMILY: the vessel catches the light
+   * before the liquid moves. Every flat control is a well, so hovering
+   * brightens that well's edge and lays a faint wash in the part of it the
+   * juice has NOT filled. The wash stops at the fill by construction -- it is
+   * the well's own background and the chip paints over it -- so the hover mark
+   * can never be mistaken for a change in the value. Colour stays reserved for
+   * signal; hover is chrome, and chrome is white here and key ink there.
+   *
+   * These three were literals in three widgets (rgba .07 / .08 / --app-tint-3
+   * for the same edge), which is how the seg trough and the toggle track
+   * silently stayed crystal under the ink skins the first time round. */
+  --well-edge: rgba(255, 255, 255, 0.08);
+  --hover-edge: rgba(255, 255, 255, 0.26);
+  --hover-wash: rgba(255, 255, 255, 0.05);
+  /* The rim-light a solid object picks up under the pointer -- the knob's cap,
+   * the toggle's bead. Not a glow: a hard thin edge, so it reads at 30px. */
+  --hover-lip: rgba(255, 255, 255, 0.42);
+  --chip-sink: 100%;
+  --chip-sheen: rgba(255, 255, 255, 0.6);
+  --chip-far: 65%;
+  --chip-disperse: var(--glass-disperse);
+  --chip-glow-size: calc(9px * var(--bi-scale));
+  --chip-blend: normal;
+
+  /* Hairline weight for container outlines. A group outline is a long curve and
+   * reads heavier than the same alpha on a 20px button edge, so it gets its own
+   * rung rather than borrowing the border token. */
+  /* THE PLOT SURFACE. A graph is a well like any other -- same ground, same
+     edge -- but a canvas cannot resolve var(), so its grid has to be named
+     here as concrete colours rather than assembled from the tint ladder at the
+     call site (theme/base.ts's cssVar() reads these off the live element).
+
+     Three grid weights, not one. An evenly weighted grid is a texture the eye
+     filters out; a tiered one is a ruler the eye counts on. The zero rule is
+     brighter than a major because it is the only line that means something
+     rather than marking a position. */
+  --plot-grid: rgba(255, 255, 255, 0.045);
+  --plot-grid-major: rgba(255, 255, 255, 0.10);
+  --plot-zero: rgba(255, 255, 255, 0.22);
+  /* A drawn node's outline: the ground, so a node reads as a bead sitting in
+     the well rather than as a hole punched through the trace behind it. */
+  --plot-node-edge: #04060a;
+  --app-outline: rgba(255, 255, 255, 0.16);
+  --app-outline-hot: rgba(255, 255, 255, 0.30);
+}
+
+
+/* ==========================================================================
+   SKIN: INK
+   --------------------------------------------------------------------------
+   Juice as PIGMENT rather than light. See theme/skins.ts for why the two skins
+   are opposites rather than variants.
+
+   Everything here follows from one decision: subtractive colour needs a light
+   ground. Multiply over black is black, so an ink skin on the crystal skin's
+   near-black surface would be a skin with no colour in it at all. Paper is not
+   a stylistic preference here, it is what the compositing law requires.
+
+   The palette is riso/screenprint: few inks, each nearly pure, none of them
+   quite a process colour. Their impurity is the point -- a slightly-off cyan
+   and a fluorescent pink read as INK, while a correct cyan reads as a screen.
+   ========================================================================== */
+:root[data-skin='ink'] {
+  /* Paper. Warm, because cool white reads as a screen showing white rather
+     than as a sheet. bg2 is a second, very slightly darker stock for panels;
+     sunken is the same sheet with a flat grey plate over it. */
+  --app-bg-color1: #f2ece1;
+  --app-bg-color2: #eae2d4;
+  --app-bg-sunken: #ded5c5;
+
+  /* The KEY plate is never actually black -- it is a dense warm charcoal,
+     because a real key plate on absorbent stock never reaches zero. It is
+     called key rather than black because on dark stock it is nearly white:
+     the key is the plate that carries the line work, whatever colour that
+     plate happens to be loaded with. */
+  --app-text-color1: #191510;
+  --app-text-color2: #4a4239;
+  --app-text-color3: #857a6c;
+
+  --app-hi-color1: #ff5b2e;
+  --app-hi-color2: #1a5fd0;
+  --app-hi-color3: #ff8a1f;
+  --app-hi-color4: #e0b400;
+
+  --app-ok: #0f9d58;
+  --app-warn: #e08a00;
+  --app-error: #e0322f;
+  --app-caution: #d97a00;
+  --app-mod-color: #e05a9c;
+
+  /* Lifting an ink means laying less of it, so lift is the paper. */
+  --juice-lift: #f2ece1;
+  --juice-sink: #191510;
+
+  /* Plate weights. Ink has no tint ladder -- a flat plate is either printed or
+     not -- so these are densities of the black plate on paper. */
+  --app-tint-1: rgba(25, 21, 16, 0.05);
+  --app-tint-2: rgba(25, 21, 16, 0.09);
+  --app-tint-3: rgba(25, 21, 16, 0.14);
+  --app-tint-4: rgba(25, 21, 16, 0.22);
+  --app-tint-5: rgba(25, 21, 16, 0.32);
+  --app-border-color: rgba(25, 21, 16, 0.22);
+  /* Plot surface -- see the crystal block. On stock the grid is a light
+     pencil rule and the zero line is a real key rule at low density; the node
+     outline is the paper itself, which is what a knocked-out dot IS. */
+  --plot-grid: rgba(25, 21, 16, 0.09);
+  --plot-grid-major: rgba(25, 21, 16, 0.18);
+  --plot-zero: rgba(25, 21, 16, 0.42);
+  --plot-node-edge: var(--ink-stock);
+  --app-outline: rgba(25, 21, 16, 0.28);
+  --app-outline-hot: rgba(25, 21, 16, 0.55);
+
+  --accent: #0090c8;
+  --readout-color: #191510;
+
+  /* Ink's take on the material contract: a well is a flat grey plate, a chip
+   * is flat ink that overprints. No gradient, no inner light, no glow -- a
+   * screenprint has none of those, and keeping even one would make the skin
+   * read as the other one recoloured. Every value here is a scalar or a
+   * skin-local colour; nothing references --accent. */
+  --well-bg: var(--app-bg-sunken);
+  --well-lip: none;
+  /* Ink hovers by laying MORE KEY, never by adding light -- the same inversion
+   * every other cue in this skin makes. The wash is a tint of the key plate
+   * over the trough; the edge is the keyline drawn properly instead of faintly. */
+  --well-edge: rgba(25, 21, 16, 0.22);
+  --hover-edge: rgba(25, 21, 16, 0.62);
+  --hover-wash: rgba(25, 21, 16, 0.07);
+  --hover-lip: rgba(25, 21, 16, 0.75);
+  --chip-sink: 0%;
+  --chip-sheen: transparent;
+  --chip-far: 0%;
+  --chip-disperse: transparent;
+  --chip-glow-size: 0px;
+  --chip-blend: multiply;
+
+  /* The meniscus is a knockout on paper -- unprinted stock, not white light. */
+  --meniscus: var(--ink-stock);
+  /* The bead is a flat key-plate disc: unprinted with a rule around it when
+   * off, solid when on. */
+  --bead-bg: var(--ink-stock);
+  --bead-on-bg: var(--ink-key);
+  --bead-on-shadow: none;
+  --bead-border: 1.5px solid var(--ink-key);
+
+  /* Ink-specific. */
+  --ink-key: #191510;
+  --ink-stock: #f2ece1;
+}
+
+/* Paper tooth. One tiled turbulence, multiplied at very low strength -- the
+   difference between "a light background" and "a sheet". It sits on the body
+   so no widget pays for it, and it is the only bitmap in the whole system. */
+:root[data-skin='ink'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+}
+
+
+/* ==========================================================================
+   SKIN: INK ON DARK STOCK
+   --------------------------------------------------------------------------
+   The same medium printed on black paper, and NOT an inverted copy of the light
+   one -- the physics of the press change with the stock, and so does the
+   compositing law for the third time in this file:
+
+     ink       transparent inks MULTIPLY into white stock; overlaps darken.
+     ink-dark  opaque inks sit ON TOP of dark stock; overlaps show the upper
+               plate. A transparent ink multiplied into black is black, so on
+               dark stock a printer switches to opaque inks (often over a white
+               underbase) -- which is exactly what --chip-blend: normal is.
+
+   The consequence worth noticing: overprint, the light skin's signature, does
+   not exist here, because opaque inks do not mix. What replaces it as the
+   depth cue is that the key plate is now the LIGHTEST thing on the sheet, so
+   line work reads as drawn in light rather than cut out of it.
+   ========================================================================== */
+:root:not([data-skin='ink']) {
+  /* Black stock, warm. Not the crystal skin's near-black: paper reflects, so
+     even black card sits a few points above zero and the ink on it never
+     reaches the depth a screen can. Matching the crystal ground here would
+     make the two dark skins look like the same idea. */
+  --app-bg-color1: #14120f;
+  --app-bg-color2: #1c1916;
+  --app-bg-sunken: #262119;
+
+  --app-text-color1: #f2ece1;
+  --app-text-color2: #b3a898;
+  --app-text-color3: #7d7264;
+
+  /* Fluorescent inks. These are the ones that actually get printed on dark
+     stock, because a muted ink on black stays invisible however much of it
+     goes down. */
+  --app-hi-color1: #ff6a3d;
+  --app-hi-color2: #4aa8ff;
+  --app-hi-color3: #ffa640;
+  --app-hi-color4: #ffe066;
+
+  --app-ok: #52e08a;
+  --app-warn: #ffb84d;
+  --app-error: #ff6b6b;
+  --app-caution: #ffb02e;
+  --app-mod-color: #ff7ab8;
+
+  --app-cat-source: #4ff0b0;
+  --app-cat-color: #ffd84d;
+  --app-cat-filter: #4aa8ff;
+  --app-cat-warp: #c79dff;
+  --app-cat-composite: #ff85bd;
+  --app-cat-motion: #ffa04d;
+  --app-cat-mod: #4ce3f0;
+  --app-cat-control: #a8b6c8;
+  --app-cat-debug: #ff8a8a;
+
+  /* Lifting an opaque ink means adding more pigment toward white, not less. */
+  --juice-lift: #ffffff;
+  --juice-sink: #14120f;
+
+  --app-tint-1: rgba(242, 236, 225, 0.05);
+  --app-tint-2: rgba(242, 236, 225, 0.09);
+  --app-tint-3: rgba(242, 236, 225, 0.14);
+  --app-tint-4: rgba(242, 236, 225, 0.22);
+  --app-tint-5: rgba(242, 236, 225, 0.32);
+  --app-border-color: rgba(242, 236, 225, 0.22);
+  /* Plot surface -- see the crystal block. Light plate on dark stock, so the
+     rules come out light and the node knockout is the stock. */
+  --plot-grid: rgba(242, 236, 225, 0.07);
+  --plot-grid-major: rgba(242, 236, 225, 0.15);
+  --plot-zero: rgba(242, 236, 225, 0.38);
+  --plot-node-edge: var(--ink-stock);
+  --app-outline: rgba(242, 236, 225, 0.26);
+  --app-outline-hot: rgba(242, 236, 225, 0.5);
+
+  --accent: #4ce3f0;
+  --readout-color: #f2ece1;
+
+  --ink-key: #f2ece1;    /* the plate carrying line work -- light, on this stock */
+  --ink-stock: #14120f;
+
+  --well-bg: var(--app-bg-sunken);
+  --well-lip: none;
+  /* Key ink is the LIGHT plate on this stock, so the hover mark comes out light
+   * -- and that is the same statement as on white paper, not its opposite: the
+   * pointer lays more key. It only looks like the crystal skin's white by
+   * coincidence of stock. */
+  --well-edge: rgba(242, 236, 225, 0.20);
+  --hover-edge: rgba(242, 236, 225, 0.58);
+  --hover-wash: rgba(242, 236, 225, 0.07);
+  --hover-lip: rgba(242, 236, 225, 0.7);
+  --chip-sink: 0%;
+  --chip-sheen: transparent;
+  --chip-far: 0%;
+  --chip-disperse: transparent;
+  --chip-glow-size: 0px;
+  /* Opaque, not multiply. See the header. */
+  --chip-blend: normal;
+
+  --meniscus: var(--ink-stock);
+  --bead-bg: var(--ink-stock);
+  --bead-on-bg: var(--ink-key);
+  --bead-on-shadow: none;
+  --bead-border: 1.5px solid var(--ink-key);
+}
+
+/* Stock tooth. Screened rather than multiplied: on dark card the fibres are
+   what CATCH light, so the grain has to add rather than subtract. Same one
+   tile as the light skin -- the only bitmap in the system. */
+:root:not([data-skin='ink']) body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.35;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E");
+}
+
+/* MODULATION CHANNELS. The colours a control's LED and range take from the
+   channel feeding it (<bi-modbar>), and a pad's satellite markers
+   (<bi-xy>). Off is the dimmest text; the four lit ones are nano-modules'
+   spectral LFO palette (main, then the three satellites), reordered by how
+   strong they read -- purple, green, blue, orange (2026-09-28) -- kept identical
+   across the skins because they are identities, not decoration -- the
+   orange is the same orange in the pad, on the LED and in the preview. */
+:root {
+  --app-ch-off: var(--app-text-color3);
+  --app-ch-main: #cc66ff;
+  --app-ch-a: #aaff44;
+  --app-ch-b: #44ccff;
+  --app-ch-c: #ff9944;
+}
