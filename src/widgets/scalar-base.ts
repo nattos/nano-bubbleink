@@ -499,6 +499,13 @@ export abstract class ScalarControl extends LitElement {
     this.syncFromStore();
   }
 
+  /** Double-click the readout (the number): type a value. */
+  protected onReadoutDblClick = (e: MouseEvent): void => {
+    e.stopPropagation();
+    if (this.disabled || this.editing) return;
+    this.openEditor();
+  };
+
   protected openEditor(seed?: string): void {
     this.editing = true;
     void this.updateComplete.then(() => {

@@ -734,7 +734,7 @@ export class BiKnob extends ScalarControl {
     const unit = unitOf(s);
     return html`
       ${this.density === 'compact' ? nothing : html`<span class="label">${this.displayName}</span>`}
-      <span class="readout">
+      <span class="readout" title="Double-click to type a value" @dblclick=${this.onReadoutDblClick}>
         <span class="value reading">${formatNumber(s, this.effective)}</span>
         ${unit ? html`<span class="value units">${unit}</span>` : nothing}
       </span>

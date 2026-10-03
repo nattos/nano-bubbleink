@@ -409,7 +409,7 @@ export class BiEncoder extends ScalarControl {
     return html`
       ${this.density === 'compact' ? nothing
         : html`<span class="label">${this.displayName}</span>`}
-      <span class="readout">
+      <span class="readout" title=${enumerated ? '' : 'Double-click to type a value'} @dblclick=${enumerated ? null : this.onReadoutDblClick}>
         ${enumerated
           ? html`<span class="value reading">${formatValue(s, this.effective)}</span>`
           : html`<span class="value reading">${formatNumber(s, this.effective)}</span>

@@ -228,7 +228,7 @@ export class BiNumber extends ScalarControl {
       ${this.density === 'compact' ? nothing
         : html`<span class="label">${this.displayName}</span>`}
       <div class=${`field${this.editing ? ' editing' : ''}`} style=${w}
-           @pointerdown=${this.onPointerDown}>
+           @pointerdown=${this.onPointerDown} @dblclick=${this.onReadoutDblClick}>
         ${this.modulated
           ? html`<span class="set">&#8592;&#8202;<span class="reading">${set}</span></span>`
           : nothing}
