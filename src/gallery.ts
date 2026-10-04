@@ -369,7 +369,7 @@ const SCATTER: [number, number][] = (() => {
 const ROWS: Row[] = [
   {
     tag: 'bi-knob', axis: 'rotary scalar',
-    note: '270deg sweep, 160px full travel. Relative drag: no visible range to click into. Detent at the default.',
+    note: 'The slider bent round: the same well, juice, meniscus and proud thumb on a 270deg arc, so a panel of knobs and sliders is one family. 160px full travel, relative drag (no visible range to click into); detent at the default; modulation along the inner edge.',
     render: (s, d) => html`
       <bi-knob .binding=${s} path="osc.freq" size="lg" density=${d}></bi-knob>
       <bi-knob .binding=${s} path="osc.drive" size="md" density=${d}></bi-knob>
