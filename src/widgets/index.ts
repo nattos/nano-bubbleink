@@ -26,6 +26,7 @@ import './bi-graph';
 import './bi-grid';
 import './bi-modbar';
 import './bi-xy';
+import './bi-color';
 
 export * from './scalar-base';
 export * from './graph-series';
@@ -44,3 +45,4 @@ export * from './bi-graph';
 export * from './bi-grid';
 export * from './bi-modbar';
 export * from './bi-xy';
+export * from './bi-color';

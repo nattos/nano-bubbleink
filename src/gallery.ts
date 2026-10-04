@@ -48,6 +48,7 @@ import './widgets/bi-graph';
 import './widgets/bi-number';
 import './widgets/bi-trigger';
 import './widgets/bi-encoder';
+import './widgets/bi-color';
 import './widgets/bi-text';
 import './widgets/bi-card';
 
@@ -150,6 +151,10 @@ function demoStore(): ParamStore {
       name: 'Cutoff channel', unit: 'indexed', min: 0, max: 4, init: 2, curve: { kind: 'stepped', a: 4 },
       choices: ['off', 'main', 'a', 'b', 'c'].map((label, value) => ({ value, label })),
     }),
+    param('col.r', { name: 'Red', unit: 'percent', min: 0, max: 1, init: 0.3 }),
+    param('col.g', { name: 'Green', unit: 'percent', min: 0, max: 1, init: 0.89 }),
+    param('col.b', { name: 'Blue', unit: 'percent', min: 0, max: 1, init: 0.94 }),
+    param('col.a', { name: 'Alpha', unit: 'percent', min: 0, max: 1, init: 0.8 }),
     param('osc.x', { name: 'X', unit: 'percent', min: 0, max: 1, init: 0.35 }),
     param('osc.y', { name: 'Y', unit: 'percent', min: 0, max: 1, init: 0.6 }),
   ]);
@@ -440,6 +445,13 @@ const ROWS: Row[] = [
                   style="--accent:#4ce3f0"></bi-encoder>
       <bi-encoder .binding=${s} path="osc.mix" pressPath="osc.bypass" leds="11" size="md" density=${d}
                   style="--accent:#c37bff;--cap:#3b2559"></bi-encoder>`,
+  },
+  {
+    tag: 'bi-color', axis: 'colour',
+    note: 'Three or four channel parameters read as one swatch. The swatch opens the platform picker and a whole pick is ONE undo point (a multi edit across the channels); the caret shows a painted slider per channel, its tube the channel swept through the current colour, which is also what gives each channel an anchor of its own.',
+    render: (s, d) => html`
+      <bi-color .binding=${s} .paths=${['col.r', 'col.g', 'col.b']} label="Tint" density=${d}></bi-color>
+      <bi-color open .binding=${s} .paths=${['col.r', 'col.g', 'col.b', 'col.a']} label="Glow" density=${d}></bi-color>`,
   },
   {
     tag: 'bi-graph', axis: 'parametric curve, editable',
