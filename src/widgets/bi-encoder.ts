@@ -47,9 +47,21 @@
  * value of nothing. Any range that straddles zero anchors there, so the lit run
  * grows outward in whichever direction the value went and an untouched control
  * is visibly dark.
+ *
+ * ---------------------------------------------------------------------------
+ * THE CAP PRESSES (2026-10-04)
+ *
+ * A hardware encoder is also a button: push the cap. `pressPath` names a
+ * second parameter for it -- a press on the CAP holds it at 1 (bi-trigger's
+ * 60ms floor, so a tap reaches the engine) while a drag anywhere else turns
+ * the ring, the split a Midi Fighter Twister's own hand learns. Space presses
+ * from the keyboard. The cap lights while the parameter is at 1, whoever set
+ * it, so a press on the hardware shows too. `--cap` tints the cap (the
+ * Twister's RGB); the ring's ink is the accent.
  */
 import { html, css, svg, nothing, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { base } from '../theme/base';
 import { ScalarControl, clamp01 } from './scalar-base';
 import { arcSvg, minMark } from '../draw/marks';
@@ -97,6 +109,9 @@ const DEFAULT_STEPS = 12;
 
 const SIZE_PX = { sm: 30, md: 48, lg: 76 } as const;
 
+/** A cap tap holds its parameter this long at least -- bi-trigger's MIN_ON_MS. */
+const CAP_MIN_ON_MS = 60;
+
 @customElement('bi-encoder')
 export class BiEncoder extends ScalarControl {
   static styles = [
@@ -124,39 +139,6 @@ export class BiEncoder extends ScalarControl {
         overflow: visible;
       }
 
-      /* THE UNLIT LAMPS ARE THE DENOMINATOR.
-       *
-       * First pass drew them as a near-black recess, which is materially
-       * right -- an off LED IS a dark lens in a dark panel -- and completely
-       * defeated the widget: on the near-black crystal ground the unlit run
-       * vanished, so a five-of-twelve ring read as a five-segment arc floating
-       * in space. "Four lit out of twelve" needs the twelve.
-       *
-       * So the recess is still cut, but a grey LENS sits in it. Bright enough
-       * to count against, far enough below the juice that it can never be
-       * mistaken for a lit one -- the difference is a factor of eight in
-       * luminance, not a shade.
-       */
-      .slot { stroke: #05070b; }
-      .slot-lens { stroke: var(--app-tint-4); }
-      :host(:hover:not([disabled])) .slot-lens { stroke: var(--app-tint-5); }
-      .lit { mix-blend-mode: var(--chip-blend, screen); }
-      .lamp-core { stroke: var(--juice-pure); }
-      .lamp-glow { stroke: var(--juice-glow); }
-      .lamp-hot { stroke: var(--juice-hot); }
-      /* counter: the lamp is an EDGE rather than a volume, same inversion the
-       * knob's ranks use -- juice on the glass instead of inside it. */
-      :host([rank='counter']) .lamp-core { stroke: var(--meniscus, var(--juice-hot)); }
-
-      /* The cap is NOT the reading here, and it took a render to see it: with
-       * the knob's full-white rim the cap outshouted the lamps, which is
-       * exactly backwards for a control whose entire argument is that you read
-       * the ring. On a knob the cap is the object you grip and the arc is a
-       * gauge beside it; on an encoder the ring is the instrument and the cap
-       * is the thing you turn it with. */
-      .cap-body { fill: var(--glass-body, #171b23); stroke: var(--app-tint-5); }
-      .cap-sky { fill: var(--glass-sky, rgba(255, 255, 255, 0.06)); }
-      .pointer { stroke: var(--app-text-color1); stroke-linecap: round; }
       .mod-band { stroke: var(--app-mod-color); opacity: 0.3; }
       .mod-fill { stroke: var(--app-mod-color); }
 
@@ -169,17 +151,22 @@ export class BiEncoder extends ScalarControl {
        * as a solid block, the lit ones in the spot colour and the unlit ones in
        * a light key grey. Which is what a printed panel legend actually does --
        * you do not omit the off states from the artwork, you print them dead. */
-      .dial.ink .slot { stroke: none; }
-      .dial.ink .ink-slot { stroke: var(--ink-key); fill: none; opacity: 0.42; }
-      .dial.ink .ink-lamp { stroke: var(--juice); }
-      .dial.ink .ink-lamp-key { stroke: var(--ink-key); opacity: 0.6; }
-      .dial.ink .cap-body { fill: var(--ink-stock); stroke: var(--ink-key); }
-      .dial.ink .pointer { stroke: var(--ink-key); }
+      .ink-slot { stroke: var(--ink-key); fill: none; opacity: 0.42; }
+      :host(:hover:not([disabled])) .ink-slot { opacity: 0.55; }
+      .ink-lamp { stroke: var(--juice); }
+      .ink-lamp-key { stroke: var(--ink-key); opacity: 0.6; }
+      .cap-body { fill: var(--cap, var(--ink-stock)); stroke: var(--ink-key); }
+      .pointer { stroke: var(--ink-key); stroke-linecap: round; }
+      /* A cap that presses says so under the pointer; held, it lights. */
+      .dial.pressable .cap-body { cursor: pointer; }
+      .press-light { fill: var(--juice-hot); opacity: 0; pointer-events: none; }
+      .dial.pressed .cap-body { stroke: var(--juice-hot); }
+      .dial.pressed .press-light { opacity: 0.9; }
       /* A counter ring drops the spot plate entirely and prints its lit lamps
        * in key. Same rule as the counter knob's halftone -- the accompaniment
        * gets less ink, not paler ink -- and here "less" means one plate rather
        * than two, which on press is literally a cheaper print. */
-      :host([rank='counter']) .dial.ink .ink-lamp { stroke: var(--app-text-color2); }
+      :host([rank='counter']) .ink-lamp { stroke: var(--app-text-color2); }
 
       .readout {
         display: flex;
@@ -216,6 +203,100 @@ export class BiEncoder extends ScalarControl {
   @property({ type: String, reflect: true }) size: keyof typeof SIZE_PX = 'md';
   /** Lamp count. 0 derives it from the spec -- see `steps`. */
   @property({ type: Number }) leds = 0;
+  /** The cap's push button: a second parameter, held at 1 while pressed. ''
+   * = the cap does not press. */
+  @property({ type: String }) pressPath = '';
+
+  private capPointer = -1;
+  private capDownAt = 0;
+  private capTimer = 0;
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    // At-target capture runs before the base class's keydown, so Space
+    // presses the cap rather than doing nothing.
+    this.addEventListener('keydown', this.onCapKey, { capture: true });
+    this.addEventListener('keyup', this.onCapKeyUp, { capture: true });
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.removeEventListener('keydown', this.onCapKey, { capture: true });
+    this.removeEventListener('keyup', this.onCapKeyUp, { capture: true });
+    this.detachCap();
+    // Torn down mid-press: put the button back, or it is a stuck note.
+    if (this.capTimer) { clearTimeout(this.capTimer); this.capTimer = 0; }
+    if (this.pressPath && this.capOn) this.binding?.setValue(this.pressPath, 0);
+  }
+
+  /** The press parameter's state -- the engine's, so a hardware press lights too. */
+  private get capOn(): boolean {
+    return !!this.pressPath && (this.binding?.getValue(this.pressPath) ?? 0) >= 0.5;
+  }
+
+  /** On the cap? Measured in the dial's own 100-unit space. */
+  private onCap(e: PointerEvent): boolean {
+    const r = (e.currentTarget as Element).getBoundingClientRect();
+    if (r.width <= 0) return false;
+    const x = ((e.clientX - r.left) / r.width) * 100 - CX;
+    const y = ((e.clientY - r.top) / r.height) * 100 - CY;
+    return x * x + y * y <= (R_CAP + 2) * (R_CAP + 2);
+  }
+
+  private onDialDown = (e: PointerEvent): void => {
+    if (this.pressPath && !this.disabled && e.button === 0 && this.capPointer < 0 && this.onCap(e)) {
+      e.preventDefault();
+      this.focus();
+      this.capPointer = e.pointerId;
+      window.addEventListener('pointerup', this.onCapUp);
+      window.addEventListener('pointercancel', this.onCapUp);
+      this.strikeCap();
+      return;
+    }
+    this.onPointerDown(e);
+  };
+
+  private onCapUp = (e: PointerEvent): void => {
+    if (e.pointerId !== this.capPointer) return;
+    this.detachCap();
+    this.releaseCap();
+  };
+
+  private detachCap(): void {
+    if (this.capPointer < 0) return;
+    this.capPointer = -1;
+    window.removeEventListener('pointerup', this.onCapUp);
+    window.removeEventListener('pointercancel', this.onCapUp);
+  }
+
+  private onCapKey = (e: KeyboardEvent): void => {
+    if (!this.pressPath || e.key !== ' ' || this.editing) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (!e.repeat) this.strikeCap();
+  };
+
+  private onCapKeyUp = (e: KeyboardEvent): void => {
+    if (!this.pressPath || e.key !== ' ') return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    this.releaseCap();
+  };
+
+  private strikeCap(): void {
+    if (this.capTimer) { clearTimeout(this.capTimer); this.capTimer = 0; }
+    this.capDownAt = performance.now();
+    this.binding?.setValue(this.pressPath, 1);
+    this.rev++;
+  }
+
+  /** Held at least CAP_MIN_ON_MS: see bi-trigger's MIN_ON_MS. */
+  private releaseCap(): void {
+    const held = performance.now() - this.capDownAt;
+    const up = () => { this.capTimer = 0; this.binding?.setValue(this.pressPath, 0); this.rev++; };
+    if (held >= CAP_MIN_ON_MS) up();
+    else this.capTimer = window.setTimeout(up, CAP_MIN_ON_MS - held);
+  }
 
 
   protected updated(changed: PropertyValues): void {
@@ -269,13 +350,13 @@ export class BiEncoder extends ScalarControl {
     const s = this.spec;
     if (!s) return html`<span class="note caution">no spec: ${this.path}</span>`;
     const p = clamp01(this.pos);
-    const ink = true;
+    const cls = { dial: true, pressable: !!this.pressPath, pressed: this.capOn };
     return html`
-      <svg class=${`dial${ink ? ' ink' : ''}`} viewBox="0 0 100 100"
-           @pointerdown=${this.onPointerDown}>
+      <svg class=${classMap(cls)} viewBox="0 0 100 100"
+           @pointerdown=${this.onDialDown}>
         <g style="isolation: isolate">
           ${this.modArc(s)}
-          ${this.countable ? this.lamps(s, p, ink) : this.fallbackArc(p, ink)}
+          ${this.countable ? this.lamps(s, p) : this.fallbackArc(p)}
           ${this.cap(p)}
         </g>
       </svg>
@@ -307,11 +388,9 @@ export class BiEncoder extends ScalarControl {
     return [a0 + LED_GAP_DEG / 2, a0 + span - LED_GAP_DEG / 2];
   }
 
-  private lamps(s: ParamSpec, p: number, ink: boolean) {
+  private lamps(s: ParamSpec, p: number) {
     const n = this.steps;
     const [from, to] = this.run(s, p);
-    const held = this.press.value;
-    const hov = this.hoverS.value;
     // Floored the same way every mark in this family is, but the floor has to
     // be stated in SCREEN px and converted, because the stroke width is in
     // viewBox units and a viewBox unit is a different size at every zoom. A
@@ -323,53 +402,25 @@ export class BiEncoder extends ScalarControl {
       const [a0, a1] = this.lampAngles(i);
       const d = arcSvg(CX, CY, R_RING, a0, a1);
       const on = i >= from && i < to;
-      if (ink) {
-        out.push(on
-          ? svg`<path class="ink-lamp" d=${d} fill="none" stroke-width=${w}
-                      stroke-linecap="butt" />
-                <path class="ink-lamp-key" d=${d} fill="none" stroke-width=${w + 1.1}
-                      stroke-linecap="butt" opacity="0.35" />`
-          : svg`<path class="ink-slot" d=${d} fill="none" stroke-width=${w}
-                      stroke-linecap="butt" />`);
-        continue;
-      }
-      // The recess, then the lens in it. Both drawn for lit lamps too: the
-      // juice is screened OVER the lens, so a lit lamp is a lit version of the
-      // same object rather than a different object in the same place.
-      out.push(svg`<path class="slot" d=${d} fill="none" stroke-width=${w + 1.8}
-                         stroke-linecap="butt" />`);
-      out.push(svg`<path class="slot-lens" d=${d} fill="none" stroke-width=${w}
-                         stroke-linecap="butt" opacity=${(0.9 + hov * 0.1).toFixed(3)} />`);
-      if (!on) continue;
-      out.push(svg`
-        <path class="lit lamp-glow" d=${d} fill="none"
-              stroke-width=${(w + 5 + held * 2).toFixed(2)} stroke-linecap="butt"
-              opacity=${(0.3 + held * 0.15).toFixed(3)} />
-        <path class="lit lamp-core" d=${d} fill="none" stroke-width=${w}
-              stroke-linecap="butt" />
-        <path class="lit lamp-hot" d=${d} fill="none" stroke-width=${(w * 0.42).toFixed(2)}
-              stroke-linecap="butt" opacity=${(0.7 + held * 0.3).toFixed(3)} />`);
+      out.push(on
+        ? svg`<path class="ink-lamp" d=${d} fill="none" stroke-width=${w}
+                    stroke-linecap="butt" />
+              <path class="ink-lamp-key" d=${d} fill="none" stroke-width=${w + 1.1}
+                    stroke-linecap="butt" opacity="0.35" />`
+        : svg`<path class="ink-slot" d=${d} fill="none" stroke-width=${w}
+                    stroke-linecap="butt" />`);
     }
     return out;
   }
 
   /** Too small to count -- see the header. One arc, no pretence of steps. */
-  private fallbackArc(p: number, ink: boolean) {
+  private fallbackArc(p: number) {
     const angle = DEG0 + p * SWEEP;
     const track = arcSvg(CX, CY, R_RING, DEG0, DEG1);
     const val = arcSvg(CX, CY, R_RING, DEG0, angle);
-    if (ink) {
-      return svg`
-        <path class="ink-slot" d=${track} fill="none" stroke-width="5" stroke-linecap="round" />
-        <path class="ink-lamp" d=${val} fill="none" stroke-width="5" stroke-linecap="round" />`;
-    }
     return svg`
-      <path class="slot" d=${track} fill="none" stroke-width="6.8" stroke-linecap="round" />
-      <path class="slot-lens" d=${track} fill="none" stroke-width="5" stroke-linecap="round"
-            opacity="0.75" />
-      <path class="lit lamp-glow" d=${val} fill="none" stroke-width="10"
-            stroke-linecap="round" opacity="0.3" />
-      <path class="lit lamp-core" d=${val} fill="none" stroke-width="5" stroke-linecap="round" />`;
+      <path class="ink-slot" d=${track} fill="none" stroke-width="5" stroke-linecap="round" />
+      <path class="ink-lamp" d=${val} fill="none" stroke-width="5" stroke-linecap="round" />`;
   }
 
   private cap(p: number) {
@@ -379,8 +430,9 @@ export class BiEncoder extends ScalarControl {
     const x2 = CX + Math.sin(angle) * (R_CAP - 13);
     const y2 = CY - Math.cos(angle) * (R_CAP - 13);
     return svg`
-      <circle class="cap-body" cx=${CX} cy=${CY} r=${R_CAP} stroke-width="1" />
-      <circle class="cap-sky" cx=${CX} cy=${CY - R_CAP * 0.28} r=${R_CAP * 0.66} />
+      <circle class="cap-body" cx=${CX} cy=${CY} r=${R_CAP}
+              stroke-width=${this.capOn ? 3 : 1} />
+      <circle class="press-light" cx=${CX} cy=${CY} r=${R_CAP * 0.42} />
       <line class="pointer" x1=${x2.toFixed(2)} y1=${y2.toFixed(2)}
             x2=${x1.toFixed(2)} y2=${y1.toFixed(2)} stroke-width="2.4" />`;
   }

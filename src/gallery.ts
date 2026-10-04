@@ -433,6 +433,15 @@ const ROWS: Row[] = [
       <bi-encoder .binding=${s} path="osc.drive" size="sm" density=${d}></bi-encoder>`,
   },
   {
+    tag: 'bi-encoder', axis: 'pressable cap',
+    note: 'A hardware encoder is also a button. `pressPath` names its parameter: press the CAP to hold it at 1 (60ms floor), drag anywhere else to turn the ring; Space presses from the keyboard. The cap lights while the parameter is 1 -- whoever set it. `--cap` tints the cap (a Twister\'s RGB), `--accent` inks the ring; 11 lamps, as on the hardware.',
+    render: (s, d) => html`
+      <bi-encoder .binding=${s} path="osc.drive" pressPath="osc.retrig" leds="11" size="lg" density=${d}
+                  style="--accent:#4ce3f0"></bi-encoder>
+      <bi-encoder .binding=${s} path="osc.mix" pressPath="osc.bypass" leds="11" size="md" density=${d}
+                  style="--accent:#c37bff;--cap:#3b2559"></bi-encoder>`,
+  },
+  {
     tag: 'bi-graph', axis: 'parametric curve, editable',
     note: 'Drag a node to move it, drag the line between two nodes to BEND that segment, double-click to add or remove. Bending cannot move a node -- the warp is exact at both ends by construction -- so the two gestures share one surface without interfering. The grey line is the same widget as a `counter` reference layer.',
     render: (_s, d) => html`<curve-host density=${d}></curve-host>`,
