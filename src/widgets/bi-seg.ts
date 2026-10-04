@@ -232,6 +232,10 @@ export class BiSeg extends LitElement {
 
   @state() private rev = 0;
   @state() private measured = false;
+  /** One row did not fit the width it was given: wrap, until the width comes
+   * back to `natural` (the one-row width measured when it overflowed). */
+  @state() private overflowWrap = false;
+  private natural = 0;
 
   @query('.seg') private segEl?: HTMLElement;
 
@@ -257,7 +261,7 @@ export class BiSeg extends LitElement {
     this.addEventListener('keydown', this.onKeyDown);
     const store = this.binding as unknown as { changed?: { subscribe(f: () => void): () => void } };
     this.unsubscribe = store?.changed?.subscribe(() => this.rev++) ?? null;
-    this.ro = new ResizeObserver(() => this.placePill(true));
+    this.ro = new ResizeObserver(() => { this.fitRow(); this.placePill(true); });
     this.ro.observe(this);
   }
 
@@ -283,7 +287,26 @@ export class BiSeg extends LitElement {
    * this hook and the selection stopped following the value, silently, because
    * a stale pill is a plausible-looking pill.)
    */
+  /**
+   * Wrap when one row does not fit. The option count and label length decide
+   * up front (needsWrap); this catches the rest -- a three-way enum in half a
+   * two-column inspector -- by measuring, and unwraps once the width returns.
+   */
+  private fitRow(): void {
+    const seg = this.segEl;
+    if (!seg) return;
+    if (!this.overflowWrap) {
+      if (seg.scrollWidth > seg.clientWidth + 1) {
+        this.natural = seg.scrollWidth;
+        this.overflowWrap = true;
+      }
+    } else if (seg.clientWidth >= this.natural) {
+      this.overflowWrap = false;
+    }
+  }
+
   protected updated(changed: PropertyValues): void {
+    if (!this.wrap) this.fitRow();
     // First placement must not animate: a pill springing in from the left edge
     // on first paint reads as "the value just changed", which it did not.
     this.placePill(!this.measured || changed.has('binding') || changed.has('path'));
@@ -376,7 +399,7 @@ export class BiSeg extends LitElement {
 
     // Reflected so the attribute selector can drive the wrap, and computed
     // rather than authored so a schema change cannot leave it stale.
-    const shouldWrap = needsWrap(opts);
+    const shouldWrap = needsWrap(opts) || this.overflowWrap;
     if (shouldWrap !== this.wrap) this.wrap = shouldWrap;
 
     const current = Math.round(this.binding.getValue(this.path));
