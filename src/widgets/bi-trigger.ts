@@ -53,7 +53,7 @@
  * is normal and a button left stuck at 1 because the finger slid off is a note
  * that never ends.
  */
-import { LitElement, html, css, nothing } from 'lit';
+import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { base } from '../theme/base';
 import { Spring } from '../core/spring';
@@ -184,17 +184,37 @@ export class BiTrigger extends LitElement {
   private releaseTimer = 0;
   private pointerId = -1;
 
+  private unsubscribe: (() => void) | null = null;
+
   connectedCallback(): void {
     super.connectedCallback();
     if (this.tabIndex < 0) this.tabIndex = 0;
     this.addEventListener('keydown', this.onKeyDown);
     this.addEventListener('keyup', this.onKeyUp);
+    // The lamp is the ENGINE's: a parameter set elsewhere (a hardware pad, a
+    // wire) lights the key too. Values live outside Lit -- see core/store.ts.
+    const store = this.binding as unknown as { changed?: { subscribe(f: () => void): () => void } };
+    this.unsubscribe = store?.changed?.subscribe(() => this.follow()) ?? null;
+    this.follow();
+  }
+
+  protected updated(changed: PropertyValues): void {
+    if (changed.has('binding') || changed.has('path')) this.follow();
+  }
+
+  /** Adopt the parameter's state, unless our own press is holding it. */
+  private follow(): void {
+    if (this.pointerId >= 0 || this.releaseTimer) return;
+    const on = (this.binding?.getValue(this.path) ?? 0) >= 0.5;
+    if (on !== this.on) this.on = on;
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('keydown', this.onKeyDown);
     this.removeEventListener('keyup', this.onKeyUp);
+    this.unsubscribe?.();
+    this.unsubscribe = null;
     this.detach();
     // A widget torn down mid-press must put the parameter back. A trigger left
     // at 1 by a panel that closed is a stuck note with nothing left on screen
