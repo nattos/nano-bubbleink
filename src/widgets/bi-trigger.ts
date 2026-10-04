@@ -153,6 +153,11 @@ export class BiTrigger extends LitElement {
       }
       :host([density='expanded']) > .label { display: none; }
       :host([disabled]) { opacity: 0.42; pointer-events: none; }
+      :host([fill]) { display: block; width: 100%; height: 100%; gap: 0; }
+      :host([fill]) > .label { display: none; }
+      :host([fill]) .btn { width: 100%; height: 100%; padding: 0; min-width: 0; min-height: 0; box-sizing: border-box; }
+      :host([fill]) .glyph { font-size: min(var(--fs-sm), 70cqh); }
+      :host([fill]) .btn { container-type: size; }
     `,
   ];
 
@@ -165,6 +170,9 @@ export class BiTrigger extends LitElement {
   @property({ type: String }) glyph = '\u25B8';
   @property({ type: String, reflect: true }) density: Density = 'normal';
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** The key fills the host's box (a pad on a hardware surface): no padding,
+   *  no minimum, no name beside it. */
+  @property({ type: Boolean, reflect: true }) fill = false;
   /** The PARAMETER's state, not the pointer's. Reflected so the lamp is CSS. */
   @property({ type: Boolean, reflect: true }) on = false;
 

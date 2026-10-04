@@ -197,6 +197,8 @@ export class BiEncoder extends ScalarControl {
         color: var(--app-text-color3);
       }
       :host(:not([density='expanded'])) .count { display: none; }
+      :host([bare]) .label, :host([bare]) .readout, :host([bare]) .count { display: none; }
+      :host([bare]) { gap: 0; }
     `,
   ];
 

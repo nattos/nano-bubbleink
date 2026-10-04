@@ -290,6 +290,8 @@ export class BiSlider extends ScalarControl {
       :host([vertical]) .detent { top: auto; left: 0; right: 0; width: auto; height: 1px; }
       :host([vertical]) .mod { left: auto; top: 0; right: 0; bottom: 0; width: 3px; height: auto; }
       :host([vertical]) .mod-band, :host([vertical]) .mod-fill { top: auto; left: 0; right: 0; }
+      :host([bare]) .head { display: none; }
+      :host([bare]) { gap: 0; min-width: 0; min-height: 0; }
     `,
   ];
 

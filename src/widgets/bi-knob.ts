@@ -167,6 +167,8 @@ export class BiKnob extends ScalarControl {
        * unreadable at this size anyway. */
       :host([density='compact']) .label { display: none; }
       :host([density='expanded']) .label { font-size: var(--fs-md); }
+      :host([bare]) .label, :host([bare]) .readout { display: none; }
+      :host([bare]) { gap: 0; }
     `,
   ];
 
@@ -238,6 +240,10 @@ export class BiKnob extends ScalarControl {
     const bloomDeg = ((this.units(6 + held * 8) / R_TRACK) * 180) / Math.PI;
     const inner = R_TRACK - TUBE_W / 2;
     const outer = R_TRACK + TUBE_W / 2;
+    // The thumb is sized in screen px, as the slider's is -- but never more
+    // than a tenth of a small dial, where 5px would be the whole control.
+    const thumbW = Math.min(this.units(THUMB_W_PX), 10);
+    const proud = Math.min(this.units(THUMB_PROUD_PX), 5);
     return html`
       <svg class="dial" viewBox="0 0 100 100" @pointerdown=${this.onPointerDown}>
         <defs>
@@ -263,10 +269,8 @@ export class BiKnob extends ScalarControl {
           ${this.detent(s, inner, outer)}
           ${this.modStrip(s, inner)}
         </g>
-        ${this.radial('thumb-ring', angle, inner - this.units(THUMB_PROUD_PX), outer + this.units(THUMB_PROUD_PX),
-          this.units(THUMB_W_PX + 3), 'round')}
-        ${this.radial('thumb', angle, inner - this.units(THUMB_PROUD_PX), outer + this.units(THUMB_PROUD_PX),
-          this.units(THUMB_W_PX), 'round')}
+        ${this.radial('thumb-ring', angle, inner - proud, outer + proud, thumbW + this.units(3), 'round')}
+        ${this.radial('thumb', angle, inner - proud, outer + proud, thumbW, 'round')}
         <circle class="cap" cx=${CX} cy=${CY} r=${R_CAP} stroke-width="1.2" />
         <circle class="cap-wash" cx=${CX} cy=${CY} r=${R_CAP} />
         ${this.radial('pointer', angle, R_CAP * 0.35, R_CAP - 4, 3, 'round')}

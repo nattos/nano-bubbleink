@@ -129,6 +129,9 @@ export abstract class ScalarControl extends LitElement {
    * says "many" and the value marks hide -- one target's value drawn as THE
    * value would be a lie. The first edit aligns them all. Reflected for CSS. */
   @property({ type: Boolean, reflect: true }) mixed = false;
+  /** The control alone: no name, no reading. For a host that labels it
+   *  itself at a size where type would not fit (a hardware surface's cells). */
+  @property({ type: Boolean, reflect: true }) bare = false;
 
   @state() protected editing = false;
   @state() protected mod: ModState | null = null;
