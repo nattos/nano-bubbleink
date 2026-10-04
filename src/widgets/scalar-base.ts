@@ -506,6 +506,14 @@ export abstract class ScalarControl extends LitElement {
     this.openEditor();
   };
 
+  /** Open type-to-edit from outside: a host's "edit this field" command (a
+   * double-click on a row, a key on a selected field), the same box a digit
+   * or Enter opens. */
+  beginInlineEdit(): void {
+    if (this.disabled || this.editing) return;
+    this.openEditor();
+  }
+
   protected openEditor(seed?: string): void {
     this.editing = true;
     void this.updateComplete.then(() => {
