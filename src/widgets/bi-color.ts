@@ -123,18 +123,15 @@ export class BiColor extends LitElement {
     for (let i = 0; i < 3 && i < this.paths.length; i++) {
       vals[this.paths[i]] = parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255;
     }
-    if (!this.pick) {
-      if (this.binding.beginContinuousEditMulti) {
-        const start: Record<string, number> = {};
-        for (const p of Object.keys(vals)) start[p] = this.binding.getValue(p);
-        this.pick = this.binding.beginContinuousEditMulti(start);
-      } else {
-        // No multi edit: the channels land as separate writes.
-        for (const [p, v] of Object.entries(vals)) this.binding.setValue(p, v);
-        return;
-      }
+    if (this.pick) { this.pick.update(vals); return; }
+    // The first move of the picker opens the gesture AT its value, as bi-xy's
+    // press does; later moves update it.
+    if (this.binding.beginContinuousEditMulti) {
+      this.pick = this.binding.beginContinuousEditMulti(vals);
+    } else {
+      // No multi edit: the channels land as separate writes.
+      for (const [p, v] of Object.entries(vals)) this.binding.setValue(p, v);
     }
-    this.pick.update(vals);
   };
 
   private onPickDone = (): void => {
