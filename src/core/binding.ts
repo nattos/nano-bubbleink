@@ -76,6 +76,12 @@ export interface FieldBinding {
    * single-target bindings; treat absence as false. */
   isMixed?(path: string): boolean;
 
+  /** Multi-target editing: the values the bound targets hold between them (in
+   * the field's own units -- an enum's choice values), so an enumerated widget
+   * can mark every one in use rather than none. Absent: treat a mixed field as
+   * using everything. */
+  inUseValues?(path: string): number[];
+
   /** Descriptor lookup, so a widget needs no hand-passed min/max/unit/curve. */
   spec(path: string): import('./schema').ParamSpec | undefined;
 }

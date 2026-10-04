@@ -103,6 +103,7 @@ export class BiToggle extends LitElement {
       }
       /* The bead. A lens, not a dot: lit from above, with its own tiny
        * specular, so it reads as a solid object travelling in the tube. */
+      :host([mixed]) .pip { opacity: 0.45; }
       .pip {
         position: absolute;
         z-index: 1;
@@ -232,7 +233,8 @@ export class BiToggle extends LitElement {
 
   private toggle = (): void => {
     if (this.disabled) return;
-    this.binding.setValue(this.path, this.on ? 0 : 1);
+    // Mixed aligns every target to ON.
+    this.binding.setValue(this.path, this.on && !this.hasAttribute('mixed') ? 0 : 1);
     this.sync();
   };
 
@@ -254,7 +256,7 @@ export class BiToggle extends LitElement {
   private pipStyle(): string {
     const s = this.scaleFactor;
     const travel = (TRACK_W - PIP - INSET * 2) * s;
-    const x = this.t.value * travel;
+    const x = (this.hasAttribute('mixed') ? 0.5 : this.t.value) * travel;
     const squash = Math.min(SQUASH_MAX, Math.abs(this.t.velocity) * SQUASH_GAIN);
     return `transform: translateX(${x.toFixed(2)}px) scale(${(1 + squash).toFixed(3)}, ${(
       1 - squash * 0.6
@@ -269,6 +271,10 @@ export class BiToggle extends LitElement {
     const spec = this.binding?.spec(this.path);
     if (!spec) return html`<span class="note caution">no spec: ${this.path}</span>`;
     const name = this.label || spec.shortName || spec.name;
+    // Multi-target: the targets disagree. The pip sits between, dim -- neither
+    // state -- and a click aligns them all to ON.
+    const mixed = this.binding.isMixed?.(this.path) ?? false;
+    if (mixed !== this.hasAttribute('mixed')) this.toggleAttribute('mixed', mixed);
     return html`
       <div class="row" @click=${this.toggle}>
         ${this.density === 'compact' ? nothing : html`<span class="label">${name}</span>`}

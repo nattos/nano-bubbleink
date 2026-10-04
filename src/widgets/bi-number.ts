@@ -221,7 +221,7 @@ export class BiNumber extends ScalarControl {
      * trying to keep unmodulated fields quiet, and `modulated` alone already
      * does that.
      */
-    const live = formatNumber(s, this.effective);
+    const live = this.reading(s);
     const set = formatNumber(s, this.value);
 
     return html`

@@ -110,6 +110,8 @@ export class BiKnob extends ScalarControl {
       .mod-band { stroke: var(--app-mod-color); opacity: 0.28; }
       .mod-fill { stroke: var(--app-mod-color); }
       :host([modulated]) .fill { opacity: 0.4; }
+      :host([mixed]) .fill, :host([mixed]) .glow, :host([mixed]) .rim, :host([mixed]) .meniscus,
+      :host([mixed]) .thumb, :host([mixed]) .thumb-ring, :host([mixed]) .pointer { display: none; }
       :host([rank='counter']) .fill { stroke: var(--juice-wash); mix-blend-mode: normal; }
       .rim { stroke: var(--juice); }
       :host([rank='counter']) .glow { display: none; }
@@ -314,8 +316,8 @@ export class BiKnob extends ScalarControl {
     return html`
       ${this.density === 'compact' ? nothing : html`<span class="label">${this.displayName}</span>`}
       <span class="readout" title="Double-click to type a value" @dblclick=${this.onReadoutDblClick}>
-        <span class="value reading">${formatNumber(s, this.effective)}</span>
-        ${unit ? html`<span class="value units">${unit}</span>` : nothing}
+        <span class="value reading">${this.reading(s)}</span>
+        ${unit && !this.mixed ? html`<span class="value units">${unit}</span>` : nothing}
       </span>
     `;
   }

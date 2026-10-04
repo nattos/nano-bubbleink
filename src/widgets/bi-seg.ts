@@ -381,6 +381,8 @@ export class BiSeg extends LitElement {
 
     const current = Math.round(this.binding.getValue(this.path));
     const mixed = this.binding.isMixed?.(this.path) ?? false;
+    // Mixed: every choice a target holds is marked, none is "the" value.
+    const inUse = mixed ? this.binding.inUseValues?.(this.path) : undefined;
     const name = this.label || spec.shortName || spec.name;
 
     const pill = `left: ${this.left.value.toFixed(2)}px; top: ${this.top.value.toFixed(2)}px;` +
@@ -393,7 +395,7 @@ export class BiSeg extends LitElement {
         <div class="pill ${this.measured && !mixed ? '' : 'hidden'}" style=${pill}></div>
         ${opts.map(
           (o) => html`<button
-            class=${mixed ? 'partial' : o.value === current ? 'on' : ''}
+            class=${mixed ? (!inUse || inUse.includes(o.value) ? 'partial' : '') : o.value === current ? 'on' : ''}
             ?disabled=${this.disabled}
             @click=${() => this.pick(o.value)}
           >${o.label}</button>`,

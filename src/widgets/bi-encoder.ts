@@ -372,6 +372,7 @@ export class BiEncoder extends ScalarControl {
    * happens to be lamp zero.
    */
   private run(s: ParamSpec, p: number): [number, number] {
+    if (this.mixed) return [0, 0];
     const n = this.steps;
     const here = Math.round(p * (n - 1));
     // Straddles zero, and zero is not already an endpoint: anchor there.
@@ -464,7 +465,7 @@ export class BiEncoder extends ScalarControl {
       <span class="readout" title=${enumerated ? '' : 'Double-click to type a value'} @dblclick=${enumerated ? null : this.onReadoutDblClick}>
         ${enumerated
           ? html`<span class="value reading">${formatValue(s, this.effective)}</span>`
-          : html`<span class="value reading">${formatNumber(s, this.effective)}</span>
+          : html`<span class="value reading">${this.reading(s)}</span>
                  ${unit ? html`<span class="value units">${unit}</span>` : nothing}`}
       </span>
       ${this.countable && this.typeLegible

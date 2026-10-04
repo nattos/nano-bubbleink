@@ -125,6 +125,10 @@ export abstract class ScalarControl extends LitElement {
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Reflected so CSS can respond to it. */
   @property({ type: Boolean, reflect: true }) modulated = false;
+  /** Multi-target editing: the targets disagree (binding.isMixed). The reading
+   * says "many" and the value marks hide -- one target's value drawn as THE
+   * value would be a lie. The first edit aligns them all. Reflected for CSS. */
+  @property({ type: Boolean, reflect: true }) mixed = false;
 
   @state() protected editing = false;
   @state() protected mod: ModState | null = null;
@@ -325,7 +329,14 @@ export abstract class ScalarControl extends LitElement {
     const s = this.spec;
     if (!s) return;
     this.pos = toPos(s, this.value);
+    const mixed = this.binding?.isMixed?.(this.path) ?? false;
+    if (mixed !== this.mixed) this.mixed = mixed;
     this.rev++;
+  }
+
+  /** The reading a readout prints: the effective value, or "many". */
+  protected reading(s: ParamSpec): string {
+    return this.mixed ? 'many' : formatNumber(s, this.effective);
   }
 
   private startModPoll(): void {

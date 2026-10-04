@@ -216,6 +216,7 @@ export class BiSlider extends ScalarControl {
         opacity: 0.6;
       }
       :host([modulated]) .fill { opacity: 0.4; }
+      :host([mixed]) .fill, :host([mixed]) .glow, :host([mixed]) .edge, :host([mixed]) .thumb { display: none; }
 
       .edit {
         font: inherit;
@@ -388,8 +389,8 @@ export class BiSlider extends ScalarControl {
   private readout(s: ParamSpec) {
     const unit = unitOf(s);
     return html`<span class="readout" title="Double-click to type a value" @dblclick=${this.onReadoutDblClick}>
-      <span class="value reading">${formatNumber(s, this.effective)}</span>
-      ${unit ? html`<span class="value units">${unit}</span>` : nothing}
+      <span class="value reading">${this.reading(s)}</span>
+      ${unit && !this.mixed ? html`<span class="value units">${unit}</span>` : nothing}
     </span>`;
   }
 
