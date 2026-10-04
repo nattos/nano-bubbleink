@@ -171,6 +171,8 @@ export class BiKnob extends ScalarControl {
   ];
 
   @property({ type: String, reflect: true }) size: keyof typeof SIZE_PX = 'md';
+  /** The dial's diameter in CSS px, over `size` (0 = use `size`). */
+  @property({ type: Number }) px = 0;
 
   /** Mask ids are document-global even from inside a shadow root in some
    * engines; a per-instance suffix removes the whole class of "every knob uses
@@ -210,13 +212,15 @@ export class BiKnob extends ScalarControl {
 
   protected updated(changed: PropertyValues): void {
     super.updated(changed);
-    if (changed.has('size')) {
-      this.style.setProperty('--knob-px', `calc(${SIZE_PX[this.size]}px * var(--bi-scale))`);
+    if (changed.has('size') || changed.has('px')) {
+      // An explicit pixel diameter (a host fitting the dial to a cell) wins
+      // over the named size, and is not zoomed: the host measured it.
+      this.style.setProperty('--knob-px', this.px > 0 ? `${this.px}px` : `calc(${SIZE_PX[this.size]}px * var(--bi-scale))`);
     }
   }
 
   /** CSS px to viewBox units at the current size. */
-  private px(n: number): number {
+  private units(n: number): number {
     return (n * 100) / Math.max(12, this.dialPx);
   }
 
@@ -231,7 +235,7 @@ export class BiKnob extends ScalarControl {
     // The juice starts past the tube's rounded end so the mask, not a butt cap,
     // shapes it -- the slider's overflow does the same for its capsule.
     const lead = ((TUBE_W / 2 / R_TRACK) * 180) / Math.PI + 2;
-    const bloomDeg = ((this.px(6 + held * 8) / R_TRACK) * 180) / Math.PI;
+    const bloomDeg = ((this.units(6 + held * 8) / R_TRACK) * 180) / Math.PI;
     const inner = R_TRACK - TUBE_W / 2;
     const outer = R_TRACK + TUBE_W / 2;
     return html`
@@ -255,14 +259,14 @@ export class BiKnob extends ScalarControl {
                   ${counter ? svg`<path class="rim" d=${arcSvg(CX, CY, outer - 1, DEG0 - lead, angle)} fill="none"
                                         stroke-width="2" />` : nothing}`
             : nothing}
-          ${this.radial('meniscus', angle, inner - 1, outer + 1, this.px(2))}
+          ${this.radial('meniscus', angle, inner - 1, outer + 1, this.units(2))}
           ${this.detent(s, inner, outer)}
           ${this.modStrip(s, inner)}
         </g>
-        ${this.radial('thumb-ring', angle, inner - this.px(THUMB_PROUD_PX), outer + this.px(THUMB_PROUD_PX),
-          this.px(THUMB_W_PX + 3), 'round')}
-        ${this.radial('thumb', angle, inner - this.px(THUMB_PROUD_PX), outer + this.px(THUMB_PROUD_PX),
-          this.px(THUMB_W_PX), 'round')}
+        ${this.radial('thumb-ring', angle, inner - this.units(THUMB_PROUD_PX), outer + this.units(THUMB_PROUD_PX),
+          this.units(THUMB_W_PX + 3), 'round')}
+        ${this.radial('thumb', angle, inner - this.units(THUMB_PROUD_PX), outer + this.units(THUMB_PROUD_PX),
+          this.units(THUMB_W_PX), 'round')}
         <circle class="cap" cx=${CX} cy=${CY} r=${R_CAP} stroke-width="1.2" />
         <circle class="cap-wash" cx=${CX} cy=${CY} r=${R_CAP} />
         ${this.radial('pointer', angle, R_CAP * 0.35, R_CAP - 4, 3, 'round')}
@@ -289,7 +293,7 @@ export class BiKnob extends ScalarControl {
   private detent(s: ParamSpec, inner: number, outer: number) {
     const t = toPos(s, s.init);
     if (!(t > 0.02 && t < 0.98)) return nothing;
-    return this.radial('detent', DEG0 + t * SWEEP, inner, outer, this.px(1));
+    return this.radial('detent', DEG0 + t * SWEEP, inner, outer, this.units(1));
   }
 
   /** Modulation rides a strip along the tube's inner edge -- the slider's strip

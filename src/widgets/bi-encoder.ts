@@ -201,6 +201,8 @@ export class BiEncoder extends ScalarControl {
   ];
 
   @property({ type: String, reflect: true }) size: keyof typeof SIZE_PX = 'md';
+  /** The dial's diameter in CSS px, over `size` (0 = use `size`). */
+  @property({ type: Number }) px = 0;
   /** Lamp count. 0 derives it from the spec -- see `steps`. */
   @property({ type: Number }) leds = 0;
   /** The cap's push button: a second parameter, held at 1 while pressed. ''
@@ -301,8 +303,10 @@ export class BiEncoder extends ScalarControl {
 
   protected updated(changed: PropertyValues): void {
     super.updated(changed);
-    if (changed.has('size')) {
-      this.style.setProperty('--enc-px', `calc(${SIZE_PX[this.size]}px * var(--bi-scale))`);
+    if (changed.has('size') || changed.has('px')) {
+      // An explicit pixel diameter (a host fitting the dial to a cell) wins
+      // over the named size, and is not zoomed: the host measured it.
+      this.style.setProperty('--enc-px', this.px > 0 ? `${this.px}px` : `calc(${SIZE_PX[this.size]}px * var(--bi-scale))`);
     }
   }
 
