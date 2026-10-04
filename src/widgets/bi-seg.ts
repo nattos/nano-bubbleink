@@ -417,7 +417,7 @@ export class BiSeg extends LitElement {
       <div class="seg" role="group">
         <div class="pill ${this.measured && !mixed ? '' : 'hidden'}" style=${pill}></div>
         ${opts.map(
-          (o) => html`<button
+          (o) => html`<button data-choice=${o.label}
             class=${mixed ? (!inUse || inUse.includes(o.value) ? 'partial' : '') : o.value === current ? 'on' : ''}
             ?disabled=${this.disabled}
             @click=${() => this.pick(o.value)}
