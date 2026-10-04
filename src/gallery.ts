@@ -383,6 +383,18 @@ const ROWS: Row[] = [
       <bi-slider .binding=${s} path="osc.temp" density=${d}></bi-slider>`,
   },
   {
+    tag: 'bi-slider', axis: 'painted / vertical',
+    note: '`painted`: the tube prints the host\'s --track-paint (a hue, a colour channel) and the thumb is the reading. `vertical`: a fader, filling from the bottom, the reading underneath -- the device surfaces\' hardware faders.',
+    render: (s, d) => html`
+      <bi-slider painted label="Hue" style="--track-paint: linear-gradient(90deg, hsl(0 75% 55%), hsl(60 75% 55%), hsl(120 75% 55%), hsl(180 75% 55%), hsl(240 75% 55%), hsl(300 75% 55%), hsl(330 75% 55%))"
+                 .binding=${s} path="osc.mix" density=${d}></bi-slider>
+      <div style="display:flex;gap:14px;height:120px">
+        <bi-slider vertical .binding=${s} path="osc.mix" density=${d}></bi-slider>
+        <bi-slider vertical rank="counter" .binding=${s} path="osc.tilt" density=${d}></bi-slider>
+        <bi-slider vertical .binding=${s} path="osc.temp" density=${d}></bi-slider>
+      </div>`,
+  },
+  {
     tag: 'bi-seg', axis: 'enumerated',
     note: 'The trough is black and the chip is juice-filled glass -- the knob\'s crystal cues flattened into box-shadow. Second row is `counter` (and over the 30-char wrap floor).',
     render: (s, d) => html`

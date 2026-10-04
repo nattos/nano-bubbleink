@@ -33,11 +33,20 @@
  * the track 14% vertically on press, which is the same shrink-on-touch idiom the
  * knob had and reads the same way; light responding to contact does not.
  *
+ * PAINTED (2026-10-04). A colour channel or a hue is read off the TRACK, not
+ * off a fill: `painted` hides the juice and prints the host's `--track-paint`
+ * (any CSS image -- a gradient through the channel) in the tube, leaving the
+ * thumb as the reading.
+ *
+ * VERTICAL (2026-10-04). A fader: the same tube stood up, filling from the
+ * bottom, the reading under it. A hardware fader is the picture, so the device
+ * surfaces use this; the host gives it its height.
+ *
  * DOM, not canvas: this is four rectangles and some text, and building it in
  * the DOM gets hover, focus, transitions and text rendering for free.
  */
 import { html, css, nothing } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { base } from '../theme/base';
 import { formatNumber, readingChars, unitOf } from '../core/format';
 import { modBand } from '../draw/modband';
@@ -233,10 +242,62 @@ export class BiSlider extends ScalarControl {
       :host([density='compact']) .track { height: calc(9px * var(--bi-scale)); }
       :host([density='compact']) .head { display: none; }
       :host([density='expanded']) .track { height: calc(20px * var(--bi-scale)); }
+
+      /* PAINTED: the tube prints the host's image; no juice, the thumb reads. */
+      :host([painted]) .track { background-image: var(--track-paint, none); }
+      :host([painted]:hover:not([disabled])) .track,
+      :host([painted]:focus-visible) .track { background-image: var(--track-paint, none); }
+      :host([painted]) .glow, :host([painted]) .fill, :host([painted]) .edge { display: none; }
+
+      /* VERTICAL: the tube stood up, the reading underneath. */
+      :host([vertical]) {
+        flex-direction: column-reverse;
+        align-items: center;
+        min-width: 0;
+        min-height: calc(60px * var(--bi-scale));
+      }
+      :host([vertical]) .head { flex-direction: column; align-items: center; gap: 0; }
+      :host([vertical]) .hit {
+        flex: 1;
+        min-height: 0;
+        padding: 0 var(--hit);
+        margin: 0 calc(-1 * var(--hit));
+        cursor: ns-resize;
+      }
+      :host([vertical]) .rail { height: 100%; }
+      :host([vertical]) .track {
+        height: 100%;
+        width: calc(14px * var(--bi-scale));
+        cursor: ns-resize;
+      }
+      :host([vertical][density='compact']) .track { height: 100%; width: calc(9px * var(--bi-scale)); }
+      :host([vertical][density='expanded']) .track { height: 100%; width: calc(20px * var(--bi-scale)); }
+      :host([vertical]) .glow { inset: auto -6px -6px -6px; }
+      :host([vertical]) .fill { inset: auto 0 0 0; }
+      :host([vertical]) .edge {
+        top: auto; left: 0; right: 0; width: auto; height: 2px;
+        margin: 0 0 -1px;
+      }
+      :host([vertical]) .thumb {
+        top: auto;
+        left: calc(-3px * var(--bi-scale));
+        right: calc(-3px * var(--bi-scale));
+        width: auto;
+        height: calc(6px * var(--bi-scale));
+        margin: 0 0 calc(-3px * var(--bi-scale));
+      }
+      :host([vertical]) .detent { top: auto; left: 0; right: 0; width: auto; height: 1px; }
+      :host([vertical]) .mod { left: auto; top: 0; right: 0; bottom: 0; width: 3px; height: auto; }
+      :host([vertical]) .mod-band, :host([vertical]) .mod-fill { top: auto; left: 0; right: 0; }
     `,
   ];
 
   @query('.track') private trackEl?: HTMLElement;
+
+  /** The tube prints the host's `--track-paint` instead of a juice fill. */
+  @property({ type: Boolean, reflect: true }) painted = false;
+  /** A fader: bottom to top, the reading underneath. */
+  @property({ type: Boolean, reflect: true }) vertical = false;
 
   /** Press-to-jump: the value should land under the cursor on pointerdown, so
    * waiting for a 5px threshold would make the first press feel dead. */
@@ -261,6 +322,15 @@ export class BiSlider extends ScalarControl {
     const r = this.trackEl?.getBoundingClientRect();
     if (!r || r.width <= 0) return this.dragStartPos;
 
+    if (this.vertical) {
+      if (r.height <= 0) return this.dragStartPos;
+      if (e.shiftKey) {
+        if (!this.fineAnchor) this.fineAnchor = { pos: this.pos, dx: delta[1] };
+        return this.fineAnchor.pos - ((delta[1] - this.fineAnchor.dx) / r.height) * FINE;
+      }
+      this.fineAnchor = null;
+      return (r.bottom - e.clientY) / r.height;
+    }
     if (e.shiftKey) {
       if (!this.fineAnchor) this.fineAnchor = { pos: this.pos, dx: delta[0] };
       return this.fineAnchor.pos + ((delta[0] - this.fineAnchor.dx) / r.width) * FINE;
@@ -274,6 +344,9 @@ export class BiSlider extends ScalarControl {
     if (!s) return html`<span class="note caution">no spec: ${this.path}</span>`;
     const p = clamp01(this.pos);
     const pct = (p * 100).toFixed(3);
+    // The axis: along `at` from the start, `size` long.
+    const at = this.vertical ? 'bottom' : 'left';
+    const size = this.vertical ? 'height' : 'width';
 
     return html`
       <div class="head">
@@ -287,12 +360,12 @@ export class BiSlider extends ScalarControl {
         <div class="rail">
           <div class="track">
             <div class="glow" style=${this.glowStyle(p)}></div>
-            <div class="fill" style="width:${pct}%"></div>
-            <div class="edge" style="left:${pct}%"></div>
+            <div class="fill" style="${size}:${pct}%"></div>
+            <div class="edge" style="${at}:${pct}%"></div>
             ${this.detent(s)}
             ${this.modStrip(s)}
           </div>
-          <div class="thumb" style="left:${pct}%"></div>
+          <div class="thumb" style="${at}:${pct}%"></div>
         </div>
       </div>
     `;
@@ -308,7 +381,7 @@ export class BiSlider extends ScalarControl {
   private glowStyle(p: number): string {
     const held = this.press.value;
     const w = p * 100;
-    return `width: calc(${w.toFixed(3)}% + ${(6 + held * 8).toFixed(1)}px);` +
+    return `${this.vertical ? 'height' : 'width'}: calc(${w.toFixed(3)}% + ${(6 + held * 8).toFixed(1)}px);` +
       ` opacity: ${(0.35 + held * 0.55).toFixed(3)}`;
   }
 
@@ -328,7 +401,7 @@ export class BiSlider extends ScalarControl {
     // Suppressed at the ends, where a tick sits under the track border and
     // reads as a rendering artefact rather than as a landmark.
     if (!(t > 0.02 && t < 0.98)) return nothing;
-    return html`<div class="detent" style="left:${(t * 100).toFixed(3)}%"></div>`;
+    return html`<div class="detent" style="${this.vertical ? 'bottom' : 'left'}:${(t * 100).toFixed(3)}%"></div>`;
   }
 
   private modStrip(s: ParamSpec) {
@@ -336,11 +409,13 @@ export class BiSlider extends ScalarControl {
     const b = modBand(s, this.mod);
     // Floored to a hairline: a fill that rounds to zero width vanishes, and an
     // absent fill reads as "not modulated" rather than "modulated to neutral".
+    const at = this.vertical ? 'bottom' : 'left';
+    const size = this.vertical ? 'height' : 'width';
     return html`<div class="mod">
       <div class="mod-band"
-           style="left:${(b.lo * 100).toFixed(3)}%;width:${Math.max(0.5, b.span * 100).toFixed(3)}%"></div>
+           style="${at}:${(b.lo * 100).toFixed(3)}%;${size}:${Math.max(0.5, b.span * 100).toFixed(3)}%"></div>
       <div class="mod-fill"
-           style="left:${(b.fillLo * 100).toFixed(3)}%;width:${Math.max(0.5, b.fillSpan * 100).toFixed(3)}%"></div>
+           style="${at}:${(b.fillLo * 100).toFixed(3)}%;${size}:${Math.max(0.5, b.fillSpan * 100).toFixed(3)}%"></div>
     </div>`;
   }
 }
