@@ -558,17 +558,58 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E");
 }
 
-/* MODULATION CHANNELS. The colours a control's LED and range take from the
-   channel feeding it (<bi-modbar>), and a pad's satellite markers
-   (<bi-xy>). Off is the dimmest text; the four lit ones are nano-modules'
-   spectral LFO palette (main, then the three satellites), reordered by how
-   strong they read -- purple, green, blue, orange (2026-09-28) -- kept identical
-   across the skins because they are identities, not decoration -- the
-   orange is the same orange in the pad, on the LED and in the preview. */
+/* CHANNELS. The four secondary colours: a modulation source's channels (a
+   control's LED and range in <bi-modbar>, a pad's satellite markers in
+   <bi-xy>), and anything else that needs FOUR things told apart at a glance
+   -- four envelopes, four lanes, four signals. Off is the dimmest text.
+
+   They are IDENTITIES, so what stays fixed across the skins is the HUE and
+   its order -- violet (the main channel), then lime, sky, orange (the
+   satellites; nano-modules' spectral LFO palette, reordered by how strong
+   they read, 2026-09-28). What changes is the INK, exactly as it does for
+   every accent: fluorescent on black stock, riso-pure on paper. (They were
+   one set of screen colours for every skin until 2026-10-04 -- a lime that
+   glows on black is invisible on paper.) Neighbours differ in LIGHTNESS as
+   well as hue, so the four still part when colour can't be told.
+
+   Numbered: --app-ch-1 .. -4. The old names (main, a, b, c) are aliases;
+   bi-modbar addresses channels by them. The values per skin are in each
+   skin's block below; this is the crystal fallback. */
 :root {
   --app-ch-off: var(--app-text-color3);
-  --app-ch-main: #cc66ff;
-  --app-ch-a: #aaff44;
-  --app-ch-b: #44ccff;
-  --app-ch-c: #ff9944;
+  --app-ch-1: #cc66ff;
+  --app-ch-2: #aaff44;
+  --app-ch-3: #44ccff;
+  --app-ch-4: #ff9944;
+
+  /* THE BEAT. The two inks a beat counter is made of: the bar's ONE and every
+     other beat. Their own role, not two accents borrowed: the one is the hot
+     ink (a CDJ's red downbeat) and the rest are the key plate, so the count
+     also reads in lightness alone. Driven, so never transitioned. */
+  --app-beat-one: #ff5b2e;
+  --app-beat: #eaeaea;
+}
+:root {
+  --app-ch-main: var(--app-ch-1);
+  --app-ch-a: var(--app-ch-2);
+  --app-ch-b: var(--app-ch-3);
+  --app-ch-c: var(--app-ch-4);
+}
+/* Paper: riso inks -- each nearly pure, none quite a process colour. */
+:root[data-skin='ink'] {
+  --app-ch-1: #7a3fd1;
+  --app-ch-2: #2c9e4b;
+  --app-ch-3: #0a86cc;
+  --app-ch-4: #f2661f;
+  --app-beat-one: #e3322b;
+  --app-beat: #191510;
+}
+/* Black stock: fluorescent inks, the only ones that show on it. */
+:root:not([data-skin='ink']) {
+  --app-ch-1: #c37bff;
+  --app-ch-2: #b4f04d;
+  --app-ch-3: #4dd2ff;
+  --app-ch-4: #ff9a47;
+  --app-beat-one: #ff5a3c;
+  --app-beat: #f2ece1;
 }
