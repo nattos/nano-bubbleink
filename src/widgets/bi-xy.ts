@@ -11,6 +11,10 @@
  * and redrawn only when the points change, so a thousand dots cost nothing
  * per frame. Markers are the small lit dots a host puts wherever it likes
  * (a source's satellites); they follow the host, not the pointer.
+ *
+ * A host with a LIVE picture (a preview the effect itself renders) slots it as
+ * `backdrop`: it fills the pad under the dots and the handle and never takes
+ * the pointer. `--xy-aspect` shapes the pad (square by default).
  */
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
@@ -33,7 +37,7 @@ export class BiXy extends LitElement implements FieldAnchors {
       :host(:focus-visible) .pad { outline: 1px solid var(--juice-hot); outline-offset: 2px; }
       .pad {
         position: relative;
-        aspect-ratio: 1 / 1;
+        aspect-ratio: var(--xy-aspect, 1 / 1);
         width: 100%;
         background: var(--well-bg);
         border: 1px solid var(--well-edge);
@@ -46,6 +50,9 @@ export class BiXy extends LitElement implements FieldAnchors {
       }
       :host(:hover:not([disabled])) .pad, :host(:focus-visible) .pad { border-color: var(--hover-edge); }
       canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+      ::slotted([slot='backdrop']) {
+        position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+      }
       .handle {
         position: absolute;
         width: calc(14px * var(--bi-scale));
@@ -186,6 +193,7 @@ export class BiXy extends LitElement implements FieldAnchors {
     return html`
       ${this.density === 'compact' ? nothing : html`<span class="label">${name}</span>`}
       <div class="pad" @pointerdown=${this.onPointerDown}>
+        <slot name="backdrop"></slot>
         <canvas></canvas>
         ${this.markers.map((m) => {
           const dx = (m.x - x) * 100, dy = ((1 - m.y) - (1 - y)) * 100;
