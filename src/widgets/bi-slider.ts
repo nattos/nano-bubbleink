@@ -216,6 +216,21 @@ export class BiSlider extends ScalarControl {
         opacity: 0.6;
       }
       :host([modulated]) .fill { opacity: 0.4; }
+      /* REPLACED: the modulation sets the value outright, so the set value has
+       * nothing to show. Its fill goes; its handle stays (it still moves the
+       * value a disconnected wire would hand back) but only as an outline; and
+       * the modulation, which now IS the value, takes the whole tube. */
+      :host([replaced]) .fill, :host([replaced]) .glow, :host([replaced]) .edge { display: none; }
+      :host([replaced]) .thumb {
+        background: var(--well-bg);
+        box-shadow: inset 0 0 0 1.5px var(--thumb, var(--app-text-color1)), 0 0 0 1px var(--well-bg);
+      }
+      :host([replaced]:hover:not([disabled])) .thumb, :host([replaced]:focus-visible) .thumb {
+        background: var(--well-bg);
+        box-shadow: inset 0 0 0 1.5px var(--juice-hot, var(--app-text-color1)), 0 0 0 1px var(--well-bg);
+      }
+      :host([replaced]) .mod { top: 0; height: auto; }
+      :host([replaced]) .mod-band { opacity: 0.22; }
       :host([mixed]) .fill, :host([mixed]) .glow, :host([mixed]) .edge, :host([mixed]) .thumb { display: none; }
 
       .edit {
@@ -290,6 +305,7 @@ export class BiSlider extends ScalarControl {
       :host([vertical]) .detent { top: auto; left: 0; right: 0; width: auto; height: 1px; }
       :host([vertical]) .mod { left: auto; top: 0; right: 0; bottom: 0; width: 3px; height: auto; }
       :host([vertical]) .mod-band, :host([vertical]) .mod-fill { top: auto; left: 0; right: 0; }
+      :host([vertical][replaced]) .mod { left: 0; width: auto; }
       :host([bare]) .head { display: none; }
       :host([bare]) { gap: 0; min-width: 0; min-height: 0; }
     `,

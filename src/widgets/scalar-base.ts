@@ -125,6 +125,9 @@ export abstract class ScalarControl extends LitElement {
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Reflected so CSS can respond to it. */
   @property({ type: Boolean, reflect: true }) modulated = false;
+  /** The modulation replaces the set value (ModState.replaces). Reflected for
+   * CSS: the set value's marks give way to the modulation's. */
+  @property({ type: Boolean, reflect: true }) replaced = false;
   /** Multi-target editing: the targets disagree (binding.isMixed). The reading
    * says "many" and the value marks hide -- one target's value drawn as THE
    * value would be a lie. The first edit aligns them all. Reflected for CSS. */
@@ -346,10 +349,11 @@ export abstract class ScalarControl extends LitElement {
     if (!this.binding?.getModulation) return;
     this.modPoller = new ChangePoller<ModState | null>(
       () => this.binding.getModulation?.(this.path) ?? null,
-      (m) => (m ? `${m.value}|${m.min}|${m.max}|${m.neutral}` : ''),
+      (m) => (m ? `${m.value}|${m.min}|${m.max}|${m.neutral}|${m.replaces ? 1 : 0}` : ''),
       (m) => {
         this.mod = m;
         this.modulated = m !== null;
+        this.replaced = !!m?.replaces;
       },
     );
     this.modPoller.start();

@@ -35,6 +35,11 @@ export interface ModState {
    * Without it, fast modulation renders as a flickering dot instead of a
    * growing bar. */
   neutral: number;
+  /** The modulation SETS the value outright (a replace fold): the set value no
+   * longer shows through, so a control draws it as overridden -- no fill, an
+   * outlined handle that still moves the (hidden) set value, the modulation
+   * at full strength. */
+  replaces?: boolean;
 }
 
 export interface ContinuousEditHandle {
