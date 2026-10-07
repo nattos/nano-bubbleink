@@ -45,7 +45,9 @@ export class BiColor extends LitElement {
         height: calc(16px * var(--bi-scale));
         border-radius: var(--app-r-3);
         border: 1px solid var(--well-edge);
-        background: ${unsafeCSS(CHECKER)};
+        /* The checker stops at the border (which is translucent): a solid well
+           under it, never a ring of checker round the colour. */
+        background: ${unsafeCSS(CHECKER)} padding-box, var(--well-bg);
         cursor: pointer;
         overflow: hidden;
         flex: none;

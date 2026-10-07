@@ -59,13 +59,24 @@
  * squash-and-stretch the toggle pip gets from its velocity, expressed as a
  * shape instead of a scale. Both edges are still springs, so interrupting a
  * travel halfway through resolves correctly rather than snapping to a keyframe.
+ *
+ * ---------------------------------------------------------------------------
+ * DRAGGING ACROSS IT
+ *
+ * A press picks the segment under the pointer, and while it is held the
+ * selection follows the pointer to whichever segment is NEAREST -- measured in
+ * two dimensions, so a wrapped bar works, and past either end the end segment
+ * holds. It is one gesture: a continuous edit (live, one undo point on
+ * release, Escape puts the value back), the same contract a slider drag uses.
+ * The pill shows the dragged value at once, whether or not the binding can
+ * preview it.
  */
 import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { base } from '../theme/base';
 import { Spring, type TierSpec } from '../core/spring';
 import { FrameLoop } from '../core/canvas';
-import type { FieldBinding } from '../core/binding';
+import type { ContinuousEditHandle, FieldBinding } from '../core/binding';
 import type { Choice } from '../core/schema';
 import type { Density } from './scalar-base';
 import { installLabelAnchors, type FieldAnchors } from '../core/anchors';
@@ -180,6 +191,9 @@ export class BiSeg extends LitElement {
         transition: color 90ms linear, background-color 90ms linear;
       }
       button:last-child { border-right: 0; }
+      /* A drag in progress: the pointer is captured, so no segment is
+       * "hovered" -- the pill alone says where it is. */
+      .seg.dragging button:hover:not(.on) { background: transparent; }
       /* Not on the selected segment: a button is positioned and paints AFTER
        * the absolutely-positioned pill, so a background here would cover the
        * selection it is supposed to be sitting on. The selected segment is
@@ -255,6 +269,12 @@ export class BiSeg extends LitElement {
   private unsubscribe: (() => void) | null = null;
   private ro: ResizeObserver | null = null;
 
+  /** A press held on the bar: the value it started from, the one under the
+   * pointer, and the edit (opened once the value first moves). */
+  private drag: { pointer: number; start: number; value: number; edit: ContinuousEditHandle | null } | null = null;
+  /** The dragged value, shown before (and whether or not) the binding has it. */
+  @state() private dragValue: number | null = null;
+
   connectedCallback(): void {
     super.connectedCallback();
     if (this.tabIndex < 0) this.tabIndex = 0;
@@ -273,6 +293,7 @@ export class BiSeg extends LitElement {
     this.ro?.disconnect();
     this.ro = null;
     this.loop.stop();
+    this.endDrag(false);
   }
 
   /**
@@ -332,6 +353,10 @@ export class BiSeg extends LitElement {
    * at the first.
    */
   private onKeyDown = (e: KeyboardEvent): void => {
+    if (this.drag) {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); this.endDrag(false); }
+      return;
+    }
     const opts = this.choices;
     if (!opts.length) return;
     const dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1
@@ -349,6 +374,72 @@ export class BiSeg extends LitElement {
     // A one-shot write, not a continuous edit: an enum has no intermediate
     // states worth previewing, and each pick is its own undo point.
     this.binding.setValue(this.path, v);
+  }
+
+  /** The choice whose segment is nearest the point (inside one: that one). */
+  private choiceAt(x: number, y: number): number | undefined {
+    const opts = this.choices;
+    const buttons = [...(this.segEl?.querySelectorAll<HTMLElement>('button') ?? [])];
+    let best = -1;
+    let bestD = Infinity;
+    buttons.forEach((b, i) => {
+      const r = b.getBoundingClientRect();
+      const dx = Math.max(r.left - x, 0, x - r.right);
+      const dy = Math.max(r.top - y, 0, y - r.bottom);
+      const d = dx * dx + dy * dy;
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    return best >= 0 ? opts[best]?.value : undefined;
+  }
+
+  private onSegDown = (e: PointerEvent): void => {
+    if (e.button !== 0 || this.disabled || this.drag) return;
+    const v = this.choiceAt(e.clientX, e.clientY);
+    if (v === undefined) return;
+    const mixed = this.binding.isMixed?.(this.path) ?? false;
+    // Mixed: no one value to start from -- any pick is a change.
+    const start = mixed ? NaN : Math.round(this.binding.getValue(this.path));
+    this.drag = { pointer: e.pointerId, start, value: start, edit: null };
+    try { this.segEl?.setPointerCapture(e.pointerId); } catch { /* already gone */ }
+    // The release ends it wherever it lands -- even if something on the way
+    // down stops the event before it reaches the captured bar.
+    window.addEventListener('pointerup', this.onSegUp, true);
+    window.addEventListener('pointercancel', this.onSegUp, true);
+    this.dragTo(v);
+  };
+
+  private onSegMove = (e: PointerEvent): void => {
+    if (!this.drag || e.pointerId !== this.drag.pointer) return;
+    const v = this.choiceAt(e.clientX, e.clientY);
+    if (v !== undefined) this.dragTo(v);
+  };
+
+  private onSegUp = (e: PointerEvent): void => {
+    if (!this.drag || e.pointerId !== this.drag.pointer) return;
+    this.endDrag(e.type === 'pointerup');
+  };
+
+  private dragTo(v: number): void {
+    const d = this.drag!;
+    if (v === d.value) return;
+    d.value = v;
+    this.dragValue = v;
+    if (d.edit) d.edit.update(v);
+    else d.edit = this.binding.beginContinuousEdit(this.path, v);
+  }
+
+  /** Release (commit) or cancel: back where it started is no edit at all. */
+  private endDrag(commit: boolean): void {
+    const d = this.drag;
+    if (!d) return;
+    this.drag = null;
+    this.dragValue = null;
+    window.removeEventListener('pointerup', this.onSegUp, true);
+    window.removeEventListener('pointercancel', this.onSegUp, true);
+    try { if (this.segEl?.hasPointerCapture(d.pointer)) this.segEl.releasePointerCapture(d.pointer); } catch { /* gone */ }
+    if (!d.edit) return;
+    if (commit && d.value !== d.start) d.edit.accept();
+    else d.edit.cancel();
   }
 
   /**
@@ -402,8 +493,9 @@ export class BiSeg extends LitElement {
     const shouldWrap = needsWrap(opts) || this.overflowWrap;
     if (shouldWrap !== this.wrap) this.wrap = shouldWrap;
 
-    const current = Math.round(this.binding.getValue(this.path));
-    const mixed = this.binding.isMixed?.(this.path) ?? false;
+    const dragging = this.dragValue !== null;
+    const current = dragging ? this.dragValue! : Math.round(this.binding.getValue(this.path));
+    const mixed = !dragging && (this.binding.isMixed?.(this.path) ?? false);
     // Mixed: every choice a target holds is marked, none is "the" value.
     const inUse = mixed ? this.binding.inUseValues?.(this.path) : undefined;
     const name = this.label || spec.shortName || spec.name;
@@ -414,13 +506,15 @@ export class BiSeg extends LitElement {
 
     return html`
       ${this.density === 'compact' ? nothing : html`<span class="label">${name}</span>`}
-      <div class="seg" role="group">
+      <div class="seg ${dragging ? 'dragging' : ''}" role="group"
+        @pointerdown=${this.onSegDown} @pointermove=${this.onSegMove}
+        @pointerup=${this.onSegUp} @pointercancel=${this.onSegUp} @lostpointercapture=${this.onSegUp}>
         <div class="pill ${this.measured && !mixed ? '' : 'hidden'}" style=${pill}></div>
         ${opts.map(
           (o) => html`<button data-choice=${o.label}
             class=${mixed ? (!inUse || inUse.includes(o.value) ? 'partial' : '') : o.value === current ? 'on' : ''}
             ?disabled=${this.disabled}
-            @click=${() => this.pick(o.value)}
+            @click=${(e: MouseEvent) => { if (e.detail === 0) this.pick(o.value); }}
           >${o.label}</button>`,
         )}
       </div>
