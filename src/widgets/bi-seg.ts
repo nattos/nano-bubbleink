@@ -137,7 +137,7 @@ export class BiSeg extends LitElement {
       }
       :host([wrap]) .seg { flex-wrap: wrap; }
 
-      /* The travelling selection, under the labels. */
+      /* The traveling selection, under the labels. */
       /* The chip. One element, four crystal cues, all in box-shadow:
        *   inset 0 1px  -- the lit facet along the top edge
        *   inset 0 -1px -- the far inner wall, seen through the near face
@@ -186,7 +186,7 @@ export class BiSeg extends LitElement {
         letter-spacing: var(--app-tr-1);
         cursor: pointer;
         white-space: nowrap;
-        /* Colour only, and short. Anything positional in this system is
+        /* Color only, and short. Anything positional in this system is
          * spring-driven; this is a discrete state change, not motion. */
         transition: color 90ms linear, background-color 90ms linear;
       }
@@ -199,16 +199,16 @@ export class BiSeg extends LitElement {
        * selection it is supposed to be sitting on. The selected segment is
        * already unmistakably the target, and it still gets the container edge.
        *
-       * The wash is the well's own hover colour, so a segment under the pointer
+       * The wash is the well's own hover color, so a segment under the pointer
        * reads as a lit patch of the trough rather than as a new material. */
       button:hover { color: var(--app-text-color1); }
       button:hover:not(.on) { background: var(--hover-wash); }
       /* Dark on bright, not white on bright. The juice is a light saturated
-       * colour and white text on it is close to unreadable; near-black reads as
+       * color and white text on it is close to unreadable; near-black reads as
        * ink on a lit chip and is the higher contrast of the two. */
       button.on { color: #06080c; font-weight: 600; }
       /* Multi-target editing: this option is in use by SOME of the selection.
-       * A grey wash rather than the accent, because it is not "the" value, and
+       * A gray wash rather than the accent, because it is not "the" value, and
        * a static one rather than the pill, because the pill means "here". */
       button.partial { background: var(--app-tint-5); color: var(--app-text-color1); }
       /* NO MISREGISTRATION HERE, and the reason is worth keeping.

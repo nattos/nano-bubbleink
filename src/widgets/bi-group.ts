@@ -259,13 +259,13 @@ export class BiGroup extends LitElement {
         cursor: default;
         pointer-events: none;
       }
-      /* OPTICALLY CENTRED, NOT BOX CENTRED.
+      /* OPTICALLY CENTERED, NOT BOX CENTERED.
        *
-       * Flex centres each item's line box, and an arrow glyph is not drawn in
+       * Flex centers each item's line box, and an arrow glyph is not drawn in
        * the same part of its em box that uppercase Latin is -- it sits low, on
-       * roughly the x-height band, so box-centring lands its ink on the caps'
+       * roughly the x-height band, so box-centering lands its ink on the caps'
        * BASELINE instead of on their middle. Measured against the real font at
-       * the real sizes by scanning rendered pixels: the arrow's ink centre came
+       * the real sizes by scanning rendered pixels: the arrow's ink center came
        * out 1.72px below the caps' at 9px, which is the -0.19em below.
        *
        * A per-font constant, which is what optical alignment always is. The
@@ -279,7 +279,7 @@ export class BiGroup extends LitElement {
       }
       :host([selected]) .tab.plain { color: var(--app-text-color1); }
 
-      /* The travelling selection. A bar rather than a pill, because a tab's
+      /* The traveling selection. A bar rather than a pill, because a tab's
        * bud already has the pill's silhouette -- filling it as well would state
        * the same thing twice. It sits on the bud's base, so it reads as the lit
        * seam where the active tab joins the body. */

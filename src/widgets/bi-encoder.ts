@@ -147,9 +147,9 @@ export class BiEncoder extends ScalarControl {
        * STROKED arcs and an unstroked arc is nothing at all. Outlining each one
        * would mean twelve tiny hairline boxes, which at this size is lace.
        *
-       * So the difference is INK COLOUR, not ink presence: every lamp prints
-       * as a solid block, the lit ones in the spot colour and the unlit ones in
-       * a light key grey. Which is what a printed panel legend actually does --
+       * So the difference is INK COLOR, not ink presence: every lamp prints
+       * as a solid block, the lit ones in the spot color and the unlit ones in
+       * a light key gray. Which is what a printed panel legend actually does --
        * you do not omit the off states from the artwork, you print them dead. */
       .ink-slot { stroke: var(--ink-key); fill: none; opacity: 0.42; }
       :host(:hover:not([disabled])) .ink-slot { opacity: 0.55; }

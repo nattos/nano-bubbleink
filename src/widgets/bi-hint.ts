@@ -128,7 +128,7 @@ export class BiHint extends LitElement {
         /* The shorthand above resets border-left-color, so the juice rule has
          * to be restated -- otherwise the ink card silently loses the one mark
          * that says which control it belongs to. On stock it reads as a spot
-         * colour laid beside the key rule, which is what it is. */
+         * color laid beside the key rule, which is what it is. */
         border-left: 3px solid var(--juice);
         border-radius: var(--app-r-4);
         box-shadow: 3px 3px 0 var(--ink-key);

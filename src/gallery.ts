@@ -389,7 +389,7 @@ const ROWS: Row[] = [
   },
   {
     tag: 'bi-slider', axis: 'painted / vertical',
-    note: '`painted`: the tube prints the host\'s --track-paint (a hue, a colour channel) and the thumb is the reading. `vertical`: a fader, filling from the bottom, the reading underneath -- the device surfaces\' hardware faders.',
+    note: '`painted`: the tube prints the host\'s --track-paint (a hue, a color channel) and the thumb is the reading. `vertical`: a fader, filling from the bottom, the reading underneath -- the device surfaces\' hardware faders.',
     render: (s, d) => html`
       <bi-slider painted label="Hue" style="--track-paint: linear-gradient(90deg, hsl(0 75% 55%), hsl(60 75% 55%), hsl(120 75% 55%), hsl(180 75% 55%), hsl(240 75% 55%), hsl(300 75% 55%), hsl(330 75% 55%))"
                  .binding=${s} path="osc.mix" density=${d}></bi-slider>
@@ -447,15 +447,15 @@ const ROWS: Row[] = [
                   style="--accent:#c37bff;--cap:#3b2559"></bi-encoder>`,
   },
   {
-    tag: 'bi-color', axis: 'colour',
-    note: 'Three or four channel parameters read as one swatch. The swatch opens the platform picker and a whole pick is ONE undo point (a multi edit across the channels); the caret shows a painted slider per channel, its tube the channel swept through the current colour, which is also what gives each channel an anchor of its own.',
+    tag: 'bi-color', axis: 'color',
+    note: 'Three or four channel parameters read as one swatch. The swatch opens the platform picker and a whole pick is ONE undo point (a multi edit across the channels); the caret shows a painted slider per channel, its tube the channel swept through the current color, which is also what gives each channel an anchor of its own.',
     render: (s, d) => html`
       <bi-color .binding=${s} .paths=${['col.r', 'col.g', 'col.b']} label="Tint" density=${d}></bi-color>
       <bi-color open .binding=${s} .paths=${['col.r', 'col.g', 'col.b', 'col.a']} label="Glow" density=${d}></bi-color>`,
   },
   {
     tag: 'bi-graph', axis: 'parametric curve, editable',
-    note: 'Drag a node to move it, drag the line between two nodes to BEND that segment, double-click to add or remove. Bending cannot move a node -- the warp is exact at both ends by construction -- so the two gestures share one surface without interfering. The grey line is the same widget as a `counter` reference layer.',
+    note: 'Drag a node to move it, drag the line between two nodes to BEND that segment, double-click to add or remove. Bending cannot move a node -- the warp is exact at both ends by construction -- so the two gestures share one surface without interfering. The gray line is the same widget as a `counter` reference layer.',
     render: (_s, d) => html`<curve-host density=${d}></curve-host>`,
   },
   {
@@ -587,7 +587,7 @@ const ROWS: Row[] = [
   },
   {
     tag: 'accent', axis: 'material',
-    note: 'Juice is derived from --accent PER WIDGET, so a category hue recolours the whole material -- fill, bloom, meniscus, the tint the glass picks up -- rather than just the fill. Set on the element, nothing else changes.',
+    note: 'Juice is derived from --accent PER WIDGET, so a category hue recolors the whole material -- fill, bloom, meniscus, the tint the glass picks up -- rather than just the fill. Set on the element, nothing else changes.',
     render: (s, d) => html`${CATEGORY.map(
       (c) => html`<div class="swatch">
         <bi-knob style=${`--accent:${c.hex}`} .binding=${s} path="osc.drive"
@@ -611,7 +611,7 @@ const ROWS: Row[] = [
   },
   {
     tag: 'bi-group[tabs]', axis: 'tabbed area',
-    note: 'A panel tab is PART of the group -- it buds off the outline on concave fillets and switches what the group contains. An action tab is not: it is a detached capsule with daylight under it and a glyph, because it does not lead anywhere inside the body, it pops the subject out. Attached-versus-detached is a difference you can predict before clicking; a colour would have to be learned.',
+    note: 'A panel tab is PART of the group -- it buds off the outline on concave fillets and switches what the group contains. An action tab is not: it is a detached capsule with daylight under it and a glyph, because it does not lead anywhere inside the body, it pops the subject out. Attached-versus-detached is a difference you can predict before clicking; a color would have to be learned.',
     render: (s, d) => html`
       <bi-group .tabs=${TABS_PAIR} active="shape">
         <bi-knob slot="shape" .binding=${s} path="osc.freq" size="md" density=${d}></bi-knob>

@@ -142,7 +142,7 @@ export class BiKnob extends ScalarControl {
       .edit {
         /* Sized off the SAME reservation the readout uses, so opening the
          * editor does not resize the control. A type-to-edit box narrower or
-         * wider than the reading it replaces makes every neighbour jump the
+         * wider than the reading it replaces makes every neighbor jump the
          * instant you press a digit -- the same defect as a growing readout,
          * triggered by a keystroke instead of by a value.
          *

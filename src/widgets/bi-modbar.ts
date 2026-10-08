@@ -97,8 +97,8 @@ export class BiModbar extends LitElement {
         --hit: calc(8px * var(--bi-scale));
       }
       .rail { position: relative; }
-      /* The lamp. A bead in the channel's colour; off is the text's dimmest
-       * grey, so a routed control is the lit one at a glance. */
+      /* The lamp. A bead in the channel's color; off is the text's dimmest
+       * gray, so a routed control is the lit one at a glance. */
       /* routed to a source the panel is not showing: a dashed ring */
       .led.away {
         background: transparent;
@@ -126,11 +126,11 @@ export class BiModbar extends LitElement {
         transition: border-color 90ms linear;
       }
       :host(:hover:not([disabled])) .track, :host(:focus-visible) .track { border-color: var(--hover-edge); }
-      /* The range: the inner bar, in the channel's colour, translucent. */
+      /* The range: the inner bar, in the channel's color, translucent. */
       .range { position: absolute; top: 3px; bottom: 3px; border-radius: 999px; background: var(--led, var(--app-ch-off)); opacity: 0.32; }
-      /* The live fill: from the centre to where the engine is, full colour. */
+      /* The live fill: from the center to where the engine is, full color. */
       .fill { position: absolute; top: 3px; bottom: 3px; background: var(--led, var(--app-ch-off)); box-shadow: 0 0 4px var(--led, transparent); }
-      /* The centre: the value, a pill proud of the tube (THE THUMB). */
+      /* The center: the value, a pill proud of the tube (THE THUMB). */
       .thumb {
         position: absolute;
         top: calc(-3px * var(--bi-scale));

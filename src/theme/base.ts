@@ -31,7 +31,7 @@ export const base = css`
      * It cannot live in :root -- see the note in theme/tokens.css. A custom
      * property is substituted where it is DECLARED, so a :root derivation
      * freezes against :root's accent and every re-accented control comes out
-     * half-coloured. Declaring it here re-derives it at every widget boundary.
+     * half-colored. Declaring it here re-derives it at every widget boundary.
      *
      *   hot   the emissive core -- lit liquid, meniscus, the mark you read
      *   deep  the shadowed underside of a volume
@@ -41,7 +41,7 @@ export const base = css`
     --juice: var(--accent);
     /* LIFT and SINK are the two directions a juice can be pushed, and the SKIN
      * decides what they are -- which is the whole reason one derivation serves
-     * two opposite materials. Under crystal, lifting a colour means adding
+     * two opposite materials. Under crystal, lifting a color means adding
      * light, so lift is white and sink is near-black. Under ink, lifting means
      * laying LESS pigment, so lift is the paper and sink is a dark ink. Mixing
      * toward white on paper would give chalk, not a lighter print. */
@@ -61,7 +61,7 @@ export const base = css`
      * --chip-glow-size) and the composition happens once, here.
      *
      * --chip-sink: 0% collapses the gradient to a flat fill, which is how the
-     * ink skin gets a printed plate without naming a colour. */
+     * ink skin gets a printed plate without naming a color. */
     --chip-bg: linear-gradient(
       180deg,
       var(--juice) 0%,
@@ -73,8 +73,8 @@ export const base = css`
       inset 0 -3px 5px -2px var(--chip-disperse),
       0 0 var(--chip-glow-size) var(--juice-glow);
     /* For SCREEN-blended layers, where the alpha ramp is doing the shaping and
-     * the colour must stay at full chroma -- a pre-diluted colour screened over
-     * black is just a dimmer colour, which is the muddy version again. */
+     * the color must stay at full chroma -- a pre-diluted color screened over
+     * black is just a dimmer color, which is the muddy version again. */
     --juice-pure: var(--accent);
 
     box-sizing: border-box;
@@ -138,7 +138,7 @@ export const base = css`
    *
    * RIGHT-ALIGNED, and that is not a style choice. Decimals are fixed, so
    * right-aligning pins the decimal point: 440.0 and 7040.0 line up on the
-   * point and the digits after it never move. Centring would slide the point by
+   * point and the digits after it never move. Centering would slide the point by
    * half a character per digit, which is the jitter this class exists to
    * remove, merely smaller.
    *
@@ -155,7 +155,7 @@ export const base = css`
    *
    * The 0.02 px residual is 1ch disagreeing with the glyph advance by about
    * three thousandths of a pixel per character -- a font-metric rounding
-   * artefact, an order of magnitude below one device pixel at 2x, and in both
+   * artifact, an order of magnitude below one device pixel at 2x, and in both
    * directions rather than accumulating. It is recorded here so the next
    * person knows it is a known bound rather than something nobody looked at.
    * Chasing it would mean a magic constant, which is a worse file.

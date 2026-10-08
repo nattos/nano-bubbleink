@@ -46,7 +46,7 @@ export class BiColor extends LitElement {
         border-radius: var(--app-r-3);
         border: 1px solid var(--well-edge);
         /* The checker stops at the border (which is translucent): a solid well
-           under it, never a ring of checker round the colour. */
+           under it, never a ring of checker round the color. */
         background: ${unsafeCSS(CHECKER)} padding-box, var(--well-bg);
         cursor: pointer;
         overflow: hidden;
@@ -161,7 +161,7 @@ export class BiColor extends LitElement {
     return html`
       <div class="row">
         <span class="label">${name}</span>
-        <label class="swatch" title="Pick a colour">
+        <label class="swatch" title="Pick a color">
           <span class="ink" style="background:${this.css(c)}"></span>
           <input type="color" .value=${hex} @input=${this.onPick} @change=${this.onPickDone} />
         </label>

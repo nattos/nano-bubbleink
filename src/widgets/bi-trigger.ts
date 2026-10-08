@@ -109,7 +109,7 @@ export class BiTrigger extends LitElement {
         touch-action: none;
         white-space: nowrap;
         /* Position is set per-frame from the press spring; a CSS transition on
-         * transform would fight it. Colour is not sprung -- it is discrete
+         * transform would fight it. Color is not sprung -- it is discrete
          * state, and the house allows a <=150ms transition for that. */
         transition: border-color 120ms linear, background-color 120ms linear;
         will-change: transform;

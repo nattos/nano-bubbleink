@@ -69,7 +69,7 @@ export class BiText extends LitElement {
         width: 100%;
         /* The same well every other control is cut into. A text field is where
          * a family most easily slips into looking like a web form, and the
-         * defence is that it is made of the same material as the slider's
+         * defense is that it is made of the same material as the slider's
          * track rather than of whatever the platform's input is made of. */
         background: var(--well-bg);
         border: 1px solid var(--well-edge);
@@ -103,7 +103,7 @@ export class BiText extends LitElement {
         white-space: pre-wrap;
       }
       /* compact drops the name and shrinks to one tight line -- for a strip
-       * where the field is captioned by its neighbour. */
+       * where the field is captioned by its neighbor. */
       :host([density='compact']) .label { display: none; }
       :host([density='compact']) .control {
         font-size: var(--fs-xs);

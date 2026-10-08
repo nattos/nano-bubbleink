@@ -78,14 +78,14 @@ export class BiCard extends LitElement {
         overflow: hidden;
         transition: border-color 120ms linear, background-color 120ms linear;
       }
-      /* THE ACCENT RULE. A colour band down the leading edge, not a coloured
-       * border all round: a full coloured outline competes with the outlines of
-       * every neighbouring card, and a stack of six of them turns into the
+      /* THE ACCENT RULE. A color band down the leading edge, not a colored
+       * border all round: a full colored outline competes with the outlines of
+       * every neighboring card, and a stack of six of them turns into the
        * confetti the palette notes warn about. One edge is enough to sort a
        * stack by family at a glance.
        *
        * And the category hue stops at the rule and the pip. It is deliberately
-       * NOT pushed down into --accent for the controls inside: recolouring
+       * NOT pushed down into --accent for the controls inside: recoloring
        * every knob in every card by its device family is precisely the
        * confetti the note is about, and it would also spend the accent channel
        * -- which each control needs for its own juice -- on a fact the card
@@ -101,7 +101,7 @@ export class BiCard extends LitElement {
         opacity: 0.85;
       }
       /* SELECTION LAYERS, IT DOES NOT REPLACE. The recorded nano-modules bug:
-       * swapping the surface for the selection colour left a selected card 88%
+       * swapping the surface for the selection color left a selected card 88%
        * see-through. A tint composited over the existing ground cannot do
        * that. */
       :host([selected]) .card {
@@ -139,7 +139,7 @@ export class BiCard extends LitElement {
       }
       /* NO CATEGORY DOT. The prior art has one -- a 6px hue dot between the
        * bypass toggle and the name -- and putting it here alongside the accent
-       * rule drew the same colour twice, three pixels apart, which reads as an
+       * rule drew the same color twice, three pixels apart, which reads as an
        * unfinished layout rather than as two facts. The rule wins: it runs the
        * full height, so it survives the card being collapsed to a strip and it
        * is what the eye follows down a stack.
@@ -197,8 +197,8 @@ export class BiCard extends LitElement {
       .btn[data-open] { color: var(--app-text-color1); }
       /* THE MARK. See the file header: a hidden non-default has to be visible
        * from outside whatever is hiding it. Juice, because it is state the user
-       * set; a dot rather than a colour change on the glyph, because a colour
-       * change is only legible if you know what the other colour looked like. */
+       * set; a dot rather than a color change on the glyph, because a color
+       * change is only legible if you know what the other color looked like. */
       .btn[data-dirty]::after {
         content: '';
         position: absolute;

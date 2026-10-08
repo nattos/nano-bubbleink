@@ -102,7 +102,7 @@ export class BiToggle extends LitElement {
         pointer-events: none;
       }
       /* The bead. A lens, not a dot: lit from above, with its own tiny
-       * specular, so it reads as a solid object travelling in the tube. */
+       * specular, so it reads as a solid object traveling in the tube. */
       :host([mixed]) .pip { opacity: 0.45; }
       .pip {
         position: absolute;
@@ -136,7 +136,7 @@ export class BiToggle extends LitElement {
       /* The well lights, and the BEAD picks up a rim.
        *
        * The track alone is not enough here: a toggle is 26px wide and its edge
-       * is most of a millimetre of hairline, so the bead -- the only solid
+       * is most of a millimeter of hairline, so the bead -- the only solid
        * object in the control, and the thing a click actually moves -- carries
        * the other half. A hard ring rather than a glow, because at 30px a glow
        * is a smudge; this is the same rim-light the knob's cap takes, from the
@@ -167,7 +167,7 @@ export class BiToggle extends LitElement {
         border-color: color-mix(in srgb, var(--juice) 60%, transparent);
       }
       /* AFTER the [on] rule, not before: the on-state uses the background
-       * shorthand, so an earlier hover rule loses both the colour and the
+       * shorthand, so an earlier hover rule loses both the color and the
        * border and an expanded toggle that is switched on stops responding to
        * the pointer entirely. Setting background-color only leaves the on-state
        * gradient in place and tints the ground behind it. */

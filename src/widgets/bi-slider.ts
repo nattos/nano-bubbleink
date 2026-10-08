@@ -122,7 +122,7 @@ export class BiSlider extends ScalarControl {
         cursor: ew-resize;
         touch-action: none;
         overflow: hidden;
-        /* Discrete colour state, well under 150ms -- the one thing the house
+        /* Discrete color state, well under 150ms -- the one thing the house
          * rules let CSS time. Nothing here is positional. */
         transition: border-color 90ms linear, background-color 90ms linear;
       }
@@ -190,7 +190,7 @@ export class BiSlider extends ScalarControl {
         opacity: 0.85;
       }
       /* Modulation rides a strip along the bottom of the track rather than
-       * recolouring the fill, so the set value stays legible underneath it. */
+       * recoloring the fill, so the set value stays legible underneath it. */
       .mod {
         position: absolute;
         left: 0;
